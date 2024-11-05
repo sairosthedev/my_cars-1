@@ -1,54 +1,109 @@
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { formatCurrency } from '../utils/format'
 
-function CarList({ cars, onEdit, onDelete }) {
+function CarList({ cars, onDelete }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {cars.map(car => (
-        <div key={car.id} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 border border-stone-200">
-          <div className="relative">
-            <img
-              src={car.image}
-              alt={`${car.make} ${car.model}`}
-              className="w-full h-56 object-cover"
+    <div style={{ 
+      backgroundColor: '#F8F4E3',
+      padding: '20px',
+      borderRadius: '8px',
+      border: '2px solid #800000'
+    }}>
+      <h2 style={{ color: '#800000' }}>Car Inventory</h2>
+      {cars.map((car) => (
+        <div 
+          key={car.id} 
+          style={{
+            backgroundColor: 'white',
+            margin: '10px 0',
+            padding: '15px',
+            borderRadius: '4px',
+            border: '1px solid #DAA520',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <img 
+              src={car.image} 
+              alt={`${car.make} ${car.model}`} 
+              style={{
+                width: '80px',
+                height: '60px',
+                objectFit: 'cover',
+                borderRadius: '4px'
+              }}
             />
-            <div className="absolute top-0 right-0 m-4 bg-black bg-opacity-50 px-3 py-1 rounded-full">
-              <span className="text-white font-medium">{car.year}</span>
+            <div>
+              <p style={{ color: '#800000', fontWeight: 'bold' }}>{car.make} {car.model}</p>
+              <p style={{ color: '#DAA520' }}>{car.year} • {formatCurrency(car.price)}</p>
             </div>
           </div>
-          <div className="p-6">
-            <h3 className="text-2xl font-bold text-stone-800 mb-2">
-              {car.make} {car.model}
-            </h3>
-            <div className="space-y-2 mb-4">
-              <p className="text-xl font-semibold text-red-900">
-                {formatCurrency(car.price)}
-              </p>
-              <p className="text-stone-600">
-                {car.mileage.toLocaleString()} miles
-              </p>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => onEdit(car)}
-                className="p-2 text-amber-600 hover:text-amber-700 transition-colors duration-200"
-                aria-label="Edit car"
-              >
-                <PencilIcon className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => onDelete(car.id)}
-                className="p-2 text-red-600 hover:text-red-700 transition-colors duration-200"
-                aria-label="Delete car"
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
-            </div>
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Link
+              to={`/car/${car.id}`}
+              style={{
+                backgroundColor: '#DAA520',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <EyeIcon style={{ width: '20px', height: '20px' }} />
+              View
+            </Link>
+            
+            <Link
+              to={`/edit/${car.id}`}
+              style={{
+                backgroundColor: '#4A5568',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <PencilIcon style={{ width: '20px', height: '20px' }} />
+              Edit
+            </Link>
+            
+            <button 
+              onClick={() => onDelete(car.id)}
+              style={{
+                backgroundColor: '#800000',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <TrashIcon style={{ width: '20px', height: '20px' }} />
+              Delete
+            </button>
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-export default CarList
+export default CarList;
