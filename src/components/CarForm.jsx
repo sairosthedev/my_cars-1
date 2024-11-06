@@ -263,322 +263,334 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-card">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">
-          {initialData ? 'Update Car Details' : 'Add New Car'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form onSubmit={handleSubmit} className="space-y-6">
-          {submitError && (
-            <Alert variant="destructive">
-              <AlertDescription>{submitError}</AlertDescription>
-            </Alert>
-          )}
-          
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormItem>
-              <FormLabel>Make *</FormLabel>
-              <FormControl>
-                <Input
-                  name="make"
-                  value={formState.make}
-                  onChange={handleChange}
-                  placeholder="e.g., Toyota"
-                  className={errors.make ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.make && <FormMessage className="text-red-500">{errors.make}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Model *</FormLabel>
-              <FormControl>
-                <Input
-                  name="model"
-                  value={formState.model}
-                  onChange={handleChange}
-                  placeholder="e.g., Camry"
-                  className={errors.model ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.model && <FormMessage className="text-red-500">{errors.model}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Year *</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  name="year"
-                  value={formState.year}
-                  onChange={handleChange}
-                  min={1900}
-                  max={new Date().getFullYear() + 1}
-                  className={errors.year ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.year && <FormMessage className="text-red-500">{errors.year}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Price</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  name="price"
-                  value={formState.price}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  placeholder="Enter price"
-                  className={errors.price ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.price && <FormMessage className="text-red-500">{errors.price}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Mileage</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  name="mileage"
-                  value={formState.mileage}
-                  onChange={handleChange}
-                  min="0"
-                  placeholder="Enter mileage"
-                  className={errors.mileage ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.mileage && <FormMessage className="text-red-500">{errors.mileage}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Color</FormLabel>
-              <FormControl>
-                <Input
-                  name="color"
-                  value={formState.color}
-                  onChange={handleChange}
-                  placeholder="Enter color"
-                  className={errors.color ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.color && <FormMessage className="text-red-500">{errors.color}</FormMessage>}
-            </FormItem>
-          </div>
-
-          {/* Vehicle Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormItem>
-              <FormLabel>VIN</FormLabel>
-              <FormControl>
-                <Input
-                  name="vin"
-                  value={formState.vin}
-                  onChange={handleChange}
-                  maxLength={17}
-                  placeholder="Enter VIN"
-                  className={errors.vin ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.vin && <FormMessage className="text-red-500">{errors.vin}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>License Plate</FormLabel>
-              <FormControl>
-                <Input
-                  name="licensePlate"
-                  value={formState.licensePlate}
-                  onChange={handleChange}
-                  placeholder="Enter license plate"
-                  className={errors.licensePlate ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.licensePlate && <FormMessage className="text-red-500">{errors.licensePlate}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Transmission</FormLabel>
-              <Select
-                value={formState.transmission}
-                onValueChange={(value) => handleSelectChange('transmission', value)}
-              >
-                <SelectTrigger className={errors.transmission ? 'border-red-500' : ''}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="automatic">Automatic</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
-                  <SelectItem value="cvt">CVT</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.transmission && <FormMessage className="text-red-500">{errors.transmission}</FormMessage>}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Fuel Type</FormLabel>
-              <Select
-                value={formState.fuelType}
-                onValueChange={(value) => handleSelectChange('fuelType', value)}
-              >
-                <SelectTrigger className={errors.fuelType ? 'border-red-500' : ''}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gasoline">Gasoline</SelectItem>
-                  <SelectItem value="diesel">Diesel</SelectItem>
-                  <SelectItem value="electric">Electric</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.fuelType && <FormMessage className="text-red-500">{errors.fuelType}</FormMessage>}
-            </FormItem>
-          </div>
-
-          {/* Service Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormItem>
-              <FormLabel>Last Service Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  name="lastServiceDate"
-                  value={formState.lastServiceDate}
-                  onChange={handleChange}
-                  className={errors.lastServiceDate ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.lastServiceDate && (
-                <FormMessage className="text-red-500">{errors.lastServiceDate}</FormMessage>
-              )}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Next Service Due</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  name="nextServiceDue"
-                  value={formState.nextServiceDue}
-                  onChange={handleChange}
-                  className={errors.nextServiceDue ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.nextServiceDue && (
-                <FormMessage className="text-red-500">{errors.nextServiceDue}</FormMessage>
-              )}
-            </FormItem>
-          </div>
-
-          {/* Insurance Information */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormItem>
-              <FormLabel>Insurance Provider</FormLabel>
-              <FormControl>
-                <Input
-                  name="insurance.provider"
-                  value={formState.insurance.provider}
-                  onChange={handleChange}
-                  placeholder="Enter provider name"
-                  className={errors['insurance.provider'] ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors['insurance.provider'] && (
-                <FormMessage className="text-red-500">{errors['insurance.provider']}</FormMessage>
-              )}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Policy Number</FormLabel>
-              <FormControl>
-                <Input
-                  name="insurance.policyNumber"
-                  value={formState.insurance.policyNumber}
-                  onChange={handleChange}
-                  placeholder="Enter policy number"
-                  className={errors['insurance.policyNumber'] ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors['insurance.policyNumber'] && (
-                <FormMessage className="text-red-500">{errors['insurance.policyNumber']}</FormMessage>
-              )}
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Insurance Expiry</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  name="insurance.expiryDate"
-                  value={formState.insurance.expiryDate}
-                  onChange={handleChange}
-                  className={errors['insurance.expiryDate'] ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors['insurance.expiryDate'] && (
-                <FormMessage className="text-red-500">{errors['insurance.expiryDate']}</FormMessage>
-              )}
-            </FormItem>
-          </div>
-
-          {/* Image URL */}
-          <FormItem>
-            <FormLabel>Image URL</FormLabel>
-            <FormControl>
-              <Input
-                name="image"
-                value={formState.image}
-                onChange={handleChange}
-                placeholder="Enter URL of vehicle image"
-                className={errors.image ? 'border-red-500' : ''}
-              />
-            </FormControl>
-            {errors.image && <FormMessage className="text-red-500">{errors.image}</FormMessage>}
-          </FormItem>
-
-          {/* Notes */}
-          <FormItem>
-            <FormLabel>Notes</FormLabel>
-            <FormControl>
-              <Textarea
-                name="notes"
-                value={formState.notes}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Enter any additional notes about the vehicle"
-                className={errors.notes ? 'border-red-500' : ''}
-              />
-            </FormControl>
-            {errors.notes && <FormMessage className="text-red-500">{errors.notes}</FormMessage>}
-            <span className="text-sm text-gray-500">
-              {formState.notes.length}/1000 characters
-            </span>
-          </FormItem>
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary-dark"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span>Saving...</span>
-            ) : (
-              <span>{initialData ? 'Update Car' : 'Add Car'}</span>
+    <Card className="w-full max-w-4xl mx-auto bg-card relative overflow-hidden">
+      <div 
+        className="absolute inset-0 z-0" 
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=1000")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.1
+        }}
+      />
+      
+      <div className="relative z-10">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            {initialData ? 'Update Car Details' : 'Add New Car'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form onSubmit={handleSubmit} className="space-y-6">
+            {submitError && (
+              <Alert variant="destructive">
+                <AlertDescription>{submitError}</AlertDescription>
+              </Alert>
             )}
-          </Button>
+            
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormItem>
+                <FormLabel>Make *</FormLabel>
+                <FormControl>
+                  <Input
+                    name="make"
+                    value={formState.make}
+                    onChange={handleChange}
+                    placeholder="e.g., Toyota"
+                    className={errors.make ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.make && <FormMessage className="text-red-500">{errors.make}</FormMessage>}
+              </FormItem>
 
-          {/* Required Fields Note */}
-          <p className="text-sm text-gray-500 mt-4">
-            * Required fields
-          </p>
-        </Form>
-      </CardContent>
+              <FormItem>
+                <FormLabel>Model *</FormLabel>
+                <FormControl>
+                  <Input
+                    name="model"
+                    value={formState.model}
+                    onChange={handleChange}
+                    placeholder="e.g., Camry"
+                    className={errors.model ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.model && <FormMessage className="text-red-500">{errors.model}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Year *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    name="year"
+                    value={formState.year}
+                    onChange={handleChange}
+                    min={1900}
+                    max={new Date().getFullYear() + 1}
+                    className={errors.year ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.year && <FormMessage className="text-red-500">{errors.year}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    name="price"
+                    value={formState.price}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter price"
+                    className={errors.price ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.price && <FormMessage className="text-red-500">{errors.price}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Mileage</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    name="mileage"
+                    value={formState.mileage}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="Enter mileage"
+                    className={errors.mileage ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.mileage && <FormMessage className="text-red-500">{errors.mileage}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Color</FormLabel>
+                <FormControl>
+                  <Input
+                    name="color"
+                    value={formState.color}
+                    onChange={handleChange}
+                    placeholder="Enter color"
+                    className={errors.color ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.color && <FormMessage className="text-red-500">{errors.color}</FormMessage>}
+              </FormItem>
+            </div>
+
+            {/* Vehicle Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormItem>
+                <FormLabel>VIN</FormLabel>
+                <FormControl>
+                  <Input
+                    name="vin"
+                    value={formState.vin}
+                    onChange={handleChange}
+                    maxLength={17}
+                    placeholder="Enter VIN"
+                    className={errors.vin ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.vin && <FormMessage className="text-red-500">{errors.vin}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>License Plate</FormLabel>
+                <FormControl>
+                  <Input
+                    name="licensePlate"
+                    value={formState.licensePlate}
+                    onChange={handleChange}
+                    placeholder="Enter license plate"
+                    className={errors.licensePlate ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.licensePlate && <FormMessage className="text-red-500">{errors.licensePlate}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Transmission</FormLabel>
+                <Select
+                  value={formState.transmission}
+                  onValueChange={(value) => handleSelectChange('transmission', value)}
+                >
+                  <SelectTrigger className={errors.transmission ? 'border-red-500' : ''}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="automatic">Automatic</SelectItem>
+                    <SelectItem value="manual">Manual</SelectItem>
+                    <SelectItem value="cvt">CVT</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.transmission && <FormMessage className="text-red-500">{errors.transmission}</FormMessage>}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Fuel Type</FormLabel>
+                <Select
+                  value={formState.fuelType}
+                  onValueChange={(value) => handleSelectChange('fuelType', value)}
+                >
+                  <SelectTrigger className={errors.fuelType ? 'border-red-500' : ''}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gasoline">Gasoline</SelectItem>
+                    <SelectItem value="diesel">Diesel</SelectItem>
+                    <SelectItem value="electric">Electric</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.fuelType && <FormMessage className="text-red-500">{errors.fuelType}</FormMessage>}
+              </FormItem>
+            </div>
+
+            {/* Service Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormItem>
+                <FormLabel>Last Service Date</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    name="lastServiceDate"
+                    value={formState.lastServiceDate}
+                    onChange={handleChange}
+                    className={errors.lastServiceDate ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.lastServiceDate && (
+                  <FormMessage className="text-red-500">{errors.lastServiceDate}</FormMessage>
+                )}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Next Service Due</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    name="nextServiceDue"
+                    value={formState.nextServiceDue}
+                    onChange={handleChange}
+                    className={errors.nextServiceDue ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors.nextServiceDue && (
+                  <FormMessage className="text-red-500">{errors.nextServiceDue}</FormMessage>
+                )}
+              </FormItem>
+            </div>
+
+            {/* Insurance Information */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormItem>
+                <FormLabel>Insurance Provider</FormLabel>
+                <FormControl>
+                  <Input
+                    name="insurance.provider"
+                    value={formState.insurance.provider}
+                    onChange={handleChange}
+                    placeholder="Enter provider name"
+                    className={errors['insurance.provider'] ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors['insurance.provider'] && (
+                  <FormMessage className="text-red-500">{errors['insurance.provider']}</FormMessage>
+                )}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Policy Number</FormLabel>
+                <FormControl>
+                  <Input
+                    name="insurance.policyNumber"
+                    value={formState.insurance.policyNumber}
+                    onChange={handleChange}
+                    placeholder="Enter policy number"
+                    className={errors['insurance.policyNumber'] ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors['insurance.policyNumber'] && (
+                  <FormMessage className="text-red-500">{errors['insurance.policyNumber']}</FormMessage>
+                )}
+              </FormItem>
+
+              <FormItem>
+                <FormLabel>Insurance Expiry</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    name="insurance.expiryDate"
+                    value={formState.insurance.expiryDate}
+                    onChange={handleChange}
+                    className={errors['insurance.expiryDate'] ? 'border-red-500' : ''}
+                  />
+                </FormControl>
+                {errors['insurance.expiryDate'] && (
+                  <FormMessage className="text-red-500">{errors['insurance.expiryDate']}</FormMessage>
+                )}
+              </FormItem>
+            </div>
+
+            {/* Image URL */}
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input
+                  name="image"
+                  value={formState.image}
+                  onChange={handleChange}
+                  placeholder="Enter URL of vehicle image"
+                  className={errors.image ? 'border-red-500' : ''}
+                />
+              </FormControl>
+              {errors.image && <FormMessage className="text-red-500">{errors.image}</FormMessage>}
+            </FormItem>
+
+            {/* Notes */}
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  name="notes"
+                  value={formState.notes}
+                  onChange={handleChange}
+                  rows={4}
+                  placeholder="Enter any additional notes about the vehicle"
+                  className={errors.notes ? 'border-red-500' : ''}
+                />
+              </FormControl>
+              {errors.notes && <FormMessage className="text-red-500">{errors.notes}</FormMessage>}
+              <span className="text-sm text-gray-500">
+                {formState.notes.length}/1000 characters
+              </span>
+            </FormItem>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-red-800 to-orange-500 hover:from-red-900 hover:to-orange-600 text-white transition-all duration-300"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span>Saving...</span>
+              ) : (
+                <span>{initialData ? 'Update Car' : 'Add Car'}</span>
+              )}
+            </Button>
+
+            {/* Required Fields Note */}
+            <p className="text-sm text-gray-500 mt-4">
+              * Required fields
+            </p>
+          </Form>
+        </CardContent>
+      </div>
     </Card>
   );
 };

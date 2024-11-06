@@ -4,6 +4,7 @@ import {
   ClipboardDocumentListIcon,
   PlusCircleIcon,
   ArrowRightOnRectangleIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline'
 import { GiSteeringWheel } from 'react-icons/gi'
 
@@ -32,7 +33,7 @@ function NavBar({ setActiveView }) {
             Auto<span className="text-amber-400">Track</span>
           </span>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 absolute left-1/2 transform -translate-x-1/2">
           <Link
             to="/"
             className={`${getActiveClass('/')} flex items-center px-4 py-2 rounded-lg transition-colors duration-200`}
@@ -57,14 +58,22 @@ function NavBar({ setActiveView }) {
             <PlusCircleIcon className="h-6 w-6 mr-2" />
             <span className="font-medium text-white">Add Car</span>
           </Link>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-white hover:bg-red-700"
+          <Link
+            to="/about"
+            className={`${getActiveClass('/about')} flex items-center px-4 py-2 rounded-lg transition-colors duration-200`}
+            onClick={() => setActiveView('about')}
           >
-            <ArrowRightOnRectangleIcon className="h-6 w-6 mr-2" />
-            <span className="font-medium">Sign Out</span>
-          </button>
+            <InformationCircleIcon className="h-6 w-6 mr-2" />
+            <span className="font-medium text-white">About</span>
+          </Link>
         </div>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-white hover:bg-red-700"
+        >
+          <ArrowRightOnRectangleIcon className="h-6 w-6 mr-2" />
+          <span className="font-medium">Sign Out</span>
+        </button>
       </nav>
     </div>
   )

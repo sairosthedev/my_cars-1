@@ -9,6 +9,9 @@ import SearchBar from './components/SearchBar'
 import Footer from './components/Footer'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
+import Analytics from './components/Analytics'
+import MaintenancePage from './components/MaintenancePage'
+import About from './components/About'
 
 // Add this helper function at the top of the file, outside of the App component
 const generateUniqueId = () => {
@@ -223,6 +226,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute>
+                  <Analytics cars={cars} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/maintenance" element={<MaintenancePage />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
