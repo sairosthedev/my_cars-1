@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, TrashIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { formatCurrency } from '../utils/format'
 
 function CarList({ cars, onDelete }) {
+  const [selectedCar, setSelectedCar] = useState(null);
+
+  const handleViewClick = (car, e) => {
+    e.preventDefault();
+    setSelectedCar(car);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCar(null);
+  };
+
   return (
     <div style={{ 
       backgroundColor: '#F8F4E3',

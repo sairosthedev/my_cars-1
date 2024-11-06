@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import CarList from './components/CarList'
 import CarForm from './components/CarForm'
@@ -7,6 +7,13 @@ import NavBar from './components/NavBar'
 import Stats from './components/Stats'
 import SearchBar from './components/SearchBar'
 import Footer from './components/Footer'
+import SignIn from './components/auth/SignIn'
+import SignUp from './components/auth/SignUp'
+
+// Add this helper function at the top of the file, outside of the App component
+const generateUniqueId = () => {
+  return Date.now() + Math.random().toString(36).substr(2, 9);
+};
 
 function App() {
   const [cars, setCars] = useState([
@@ -33,6 +40,25 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [activeView, setActiveView] = useState('dashboard')
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Simulated auth check - replace with actual Supabase auth later
+  useEffect(() => {
+    const checkAuth = () => {
+      const user = localStorage.getItem('user');
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  // Protected Route component
+  const ProtectedRoute = ({ children }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/signin" replace />;
+    }
+    return children;
+  };
 
   const addCar = (car) => {
     setCars([...cars, { ...car, id: Date.now() }])
@@ -106,28 +132,101 @@ function App() {
     </div>
   )
 
+  const handleAddCar = async (carData) => {
+    try {
+      const newCar = {
+        ...carData,
+        id: generateUniqueId(),
+        createdAt: new Date().toISOString()
+      };
+      
+      setCars(prevCars => [...prevCars, newCar]);
+      setSuccessMessage('Car added successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      
+      return true;
+    } catch (error) {
+      console.error('Error adding car:', error);
+      throw error;
+    }
+  };
+
+  // Redirect component for the root path when not authenticated
+  const RootRedirect = () => {
+    if (!isAuthenticated) {
+      return <Navigate to="/signin" replace />;
+    }
+    return renderDashboard();
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-100 flex flex-col">
-        <nav className="bg-white shadow-lg sticky top-0 z-50">
-          <NavBar activeView={activeView} setActiveView={setActiveView} />
-        </nav>
-        <div className="container mx-auto px-4 pt-4 flex-grow">
+        {isAuthenticated && (
+          <nav className="bg-white shadow-lg sticky top-0 z-50">
+            <NavBar activeView={activeView} setActiveView={setActiveView} />
+          </nav>
+        )}
+        <div className={`container mx-auto px-4 ${isAuthenticated ? 'pt-4' : ''} flex-grow`}>
+          {successMessage && isAuthenticated && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+              {successMessage}
+            </div>
+          )}
           <Routes>
-            <Route path="/" element={renderDashboard()} />
-            <Route path="/inventory" element={renderInventory()} />
-            <Route path="/add" element={<CarForm onSubmit={addCar} />} />
-            <Route path="/edit/:id" element={
-              <CarForm 
-                onSubmit={updateCar}
-                initialData={editingCar}
-              />
-            } />
-            <Route path="/car/:id" element={<CarDetails cars={cars} />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route
+              path="/"
+              element={<RootRedirect />}
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute>
+                  {renderInventory()}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add"
+              element={
+                <ProtectedRoute>
+                  <CarForm
+                    onSubmit={handleAddCar}
+                    isSubmitting={false}
+                    successMessage={successMessage}
+                  />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit/:id"
+              element={
+                <ProtectedRoute>
+                  <CarForm
+                    onSubmit={updateCar}
+                    initialData={editingCar}
+                  />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/car/:id"
+              element={
+                <ProtectedRoute>
+                  <CarDetails cars={cars} />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        <Footer />
+        {isAuthenticated && <Footer />}
       </div>
     </Router>
   )

@@ -1,13 +1,12 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { formatCurrency } from '../utils/format';
 
 function CarDetails({ cars }) {
   const { id } = useParams();
-  const navigate = useNavigate();
-  
-  const car = cars.find(c => c.id === Number(id));
-  
+  const car = cars.find(c => c.id === id);
+
   if (!car) {
     return <div>Car not found</div>;
   }
@@ -18,56 +17,116 @@ function CarDetails({ cars }) {
       padding: '20px',
       borderRadius: '8px',
       border: '2px solid #800000',
-      maxWidth: '800px',
+      maxWidth: '1000px',
       margin: '20px auto'
     }}>
-      <h2 style={{ color: '#800000' }}>Car Details</h2>
-      
+      <Link
+        to="/"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          color: '#800000',
+          marginBottom: '20px',
+          textDecoration: 'none'
+        }}
+      >
+        <ArrowLeftIcon style={{ width: '20px', height: '20px' }} />
+        Back to Inventory
+      </Link>
+
       <div style={{
         backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '4px',
-        border: '1px solid #DAA520'
+        padding: '30px',
+        borderRadius: '8px',
+        border: '1px solid #DAA520',
       }}>
-        <img 
-          src={car.image} 
-          alt={`${car.make} ${car.model}`} 
-          style={{
-            width: '100%',
-            maxHeight: '400px',
-            objectFit: 'cover',
-            borderRadius: '4px',
-            marginBottom: '20px'
-          }}
-        />
-        
-        <div style={{ display: 'grid', gap: '15px' }}>
-          <h3 style={{ color: '#800000' }}>{car.make} {car.model}</h3>
-          <p><strong>Year:</strong> {car.year}</p>
-          <p><strong>Price:</strong> {formatCurrency(car.price)}</p>
-          <p><strong>Mileage:</strong> {car.mileage} miles</p>
-          {car.color && <p><strong>Color:</strong> {car.color}</p>}
-          {car.vin && <p><strong>VIN:</strong> {car.vin}</p>}
-          {car.description && <p><strong>Description:</strong> {car.description}</p>}
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+          <img 
+            src={car.image} 
+            alt={`${car.make} ${car.model}`} 
+            style={{
+              width: '300px',
+              height: '200px',
+              objectFit: 'cover',
+              borderRadius: '8px'
+            }}
+          />
+          <div>
+            <h1 style={{ color: '#800000', fontSize: '24px', marginBottom: '10px' }}>
+              {car.make} {car.model}
+            </h1>
+            <p style={{ color: '#DAA520', fontSize: '18px' }}>
+              {car.year} • {formatCurrency(car.price)}
+            </p>
+          </div>
         </div>
-        
-        <button
-          onClick={() => navigate('/inventory')}
-          style={{
-            backgroundColor: '#DAA520',
-            color: 'white',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginTop: '20px'
-          }}
-        >
-          Back to List
-        </button>
+
+        <div style={{ display: 'grid', gap: '30px' }}>
+          {/* Basic Information */}
+          <section>
+            <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              Basic Information
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
+              <p><strong>Make:</strong> {car.make}</p>
+              <p><strong>Model:</strong> {car.model}</p>
+              <p><strong>Year:</strong> {car.year}</p>
+              <p><strong>Price:</strong> {formatCurrency(car.price)}</p>
+              <p><strong>Mileage:</strong> {car.mileage}</p>
+              <p><strong>Color:</strong> {car.color}</p>
+            </div>
+          </section>
+
+          {/* Vehicle Details */}
+          <section>
+            <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              Vehicle Details
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
+              <p><strong>VIN:</strong> {car.vin}</p>
+              <p><strong>License Plate:</strong> {car.licensePlate}</p>
+              <p><strong>Transmission:</strong> {car.transmission}</p>
+              <p><strong>Fuel Type:</strong> {car.fuelType}</p>
+            </div>
+          </section>
+
+          {/* Service Information */}
+          <section>
+            <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              Service Information
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
+              <p><strong>Last Service:</strong> {car.lastServiceDate}</p>
+              <p><strong>Next Service Due:</strong> {car.nextServiceDue}</p>
+            </div>
+          </section>
+
+          {/* Insurance Information */}
+          <section>
+            <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              Insurance Information
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
+              <p><strong>Provider:</strong> {car.insurance?.provider}</p>
+              <p><strong>Policy Number:</strong> {car.insurance?.policyNumber}</p>
+              <p><strong>Expiry Date:</strong> {car.insurance?.expiryDate}</p>
+            </div>
+          </section>
+
+          {/* Notes */}
+          {car.notes && (
+            <section>
+              <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+                Notes
+              </h2>
+              <p style={{ whiteSpace: 'pre-wrap' }}>{car.notes}</p>
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default CarDetails; 
+export default CarDetails;

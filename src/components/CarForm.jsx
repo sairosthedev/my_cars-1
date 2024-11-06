@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
   const [formState, setFormState] = useState({
@@ -41,6 +42,7 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
   
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (initialData) {
@@ -177,10 +179,15 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     e.preventDefault();
     setSubmitError('');
     
+    console.log('Form submitted, validating...');
+    
     if (validateForm()) {
+      console.log('Validation passed, submitting form data:', formState);
       try {
-        await onSubmit(formState);
-        if (!initialData) {
+        const result = await onSubmit(formState);
+        console.log('Submission result:', result);
+        
+        if (!initialData && result) {
           setFormState({
             make: '',
             model: '',
@@ -202,10 +209,18 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
             },
             notes: ''
           });
+          setErrors({});
+          
+          setTimeout(() => {
+            navigate('/inventory');
+          }, 2000);
         }
       } catch (error) {
-        setSubmitError('Failed to save car details. Please try again.');
+        console.error('Submission error:', error);
+        setSubmitError(error.message || 'Failed to save car details. Please try again.');
       }
+    } else {
+      console.log('Validation failed, errors:', errors);
     }
   };
 
