@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import CarList from './components/CarList'
 import CarForm from './components/CarForm'
 import CarDetails from './components/CarDetails'
@@ -12,6 +12,8 @@ import SignUp from './components/auth/SignUp'
 import Analytics from './components/Analytics'
 import MaintenancePage from './components/MaintenancePage'
 import About from './components/About'
+import AuthCallback from './components/auth/AuthCallback'
+import { supabase } from './utils/supabaseClient'
 
 // Add this helper function at the top of the file, outside of the App component
 const generateUniqueId = () => {
@@ -48,19 +50,66 @@ function App() {
 
   // Simulated auth check - replace with actual Supabase auth later
   useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem('user');
-      setIsAuthenticated(!!user);
+    let mounted = true;
+
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setIsAuthenticated(!!session);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
     };
+
     checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (mounted) {
+        setIsAuthenticated(!!session);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   // Protected Route component
   const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/signin" replace />;
+    const navigate = useNavigate();
+    const [checked, setChecked] = useState(false);
+    
+    useEffect(() => {
+      const checkAuthentication = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            navigate('/signin', { replace: true });
+          }
+          setChecked(true);
+        } catch (error) {
+          console.error('Auth check error:', error);
+          navigate('/signin', { replace: true });
+        }
+      };
+
+      checkAuthentication();
+    }, [navigate]);
+
+    if (!checked) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
+          </div>
+        </div>
+      );
     }
-    return children;
+
+    return isAuthenticated ? children : null;
   };
 
   const addCar = (car) => {
@@ -158,14 +207,6 @@ function App() {
     }
   };
 
-  // Redirect component for the root path when not authenticated
-  const RootRedirect = () => {
-    if (!isAuthenticated) {
-      return <Navigate to="/signin" replace />;
-    }
-    return renderDashboard();
-  };
-
   return (
     <Router>
       <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -181,11 +222,25 @@ function App() {
             </div>
           )}
           <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route 
+              path="/signin" 
+              element={
+                isAuthenticated ? <Navigate to="/" replace /> : <SignIn />
+              } 
+            />
+            <Route 
+              path="/signup" 
+              element={
+                isAuthenticated ? <Navigate to="/" replace /> : <SignUp />
+              } 
+            />
             <Route
               path="/"
-              element={<RootRedirect />}
+              element={
+                <ProtectedRoute>
+                  {renderDashboard()}
+                </ProtectedRoute>
+              }
             />
             <Route
               path="/inventory"
@@ -236,6 +291,7 @@ function App() {
             />
             <Route path="/maintenance" element={<MaintenancePage />} />
             <Route path="/about" element={<About />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

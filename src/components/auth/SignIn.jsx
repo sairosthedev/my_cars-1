@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { GiSteeringWheel } from 'react-icons/gi';
+import { supabase } from '../../utils/supabaseClient';
 
 function SignIn() {
   const [email, setEmail] = useState('');
@@ -9,41 +10,38 @@ function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is already authenticated
-  const isAuthenticated = localStorage.getItem('user');
-  
-  // If already authenticated, redirect to dashboard
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Attempting signin...'); // Debug log
+      const { data, error: signinError } = await supabase.auth.signInWithPassword({
+        email: email.trim(), // Trim whitespace
+        password: password,
+      });
 
-      // Simple validation
-      if (!email || !password) {
-        throw new Error('Please fill in all fields');
+      console.log('Sign in response:', { data, error: signinError }); // Debug log
+
+      if (signinError) {
+        throw new Error(signinError.message);
       }
 
-      // Store user data in localStorage (temporary solution until Supabase integration)
-      const userData = {
-        email,
-        name: email.split('@')[0], // Using email username as display name
-        lastLogin: new Date().toISOString()
-      };
-
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Navigate to dashboard
-      navigate('/');
-      window.location.reload(); // Force reload to update authentication state
+      if (data?.user) {
+        // Store only necessary user data
+        const userData = {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || email.split('@')[0],
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        navigate('/', { replace: true });
+      } else {
+        setError('Invalid login credentials');
+      }
     } catch (error) {
+      console.error('Sign in error:', error); // Debug log
       setError(error.message || 'Failed to sign in');
     } finally {
       setIsLoading(false);

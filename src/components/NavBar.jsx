@@ -7,6 +7,7 @@ import {
   InformationCircleIcon,
 } from '@heroicons/react/24/outline'
 import { GiSteeringWheel } from 'react-icons/gi'
+import { supabase } from '../utils/supabaseClient'
 
 function NavBar({ setActiveView }) {
   const location = useLocation()
@@ -18,10 +19,19 @@ function NavBar({ setActiveView }) {
       : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
   }
 
-  const handleSignOut = () => {
-    localStorage.removeItem('user');
-    navigate('/signin');
-    window.location.reload();
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear local storage
+      localStorage.clear();
+      
+      // Navigate to sign in page
+      navigate('/signin', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error.message);
+    }
   };
 
   return (

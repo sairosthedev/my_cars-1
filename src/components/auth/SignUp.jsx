@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { GiSteeringWheel } from 'react-icons/gi';
+import { supabase } from '../../utils/supabaseClient';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -10,15 +11,8 @@ function SignUp() {
     fullName: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Check if user is already authenticated
-  const isAuthenticated = localStorage.getItem('user');
-  
-  // If already authenticated, redirect to dashboard
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,18 +24,71 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
-    // Placeholder for future Supabase integration
-    console.log('Sign up:', formData);
-    navigate('/');
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName.trim(),
+          },
+          emailRedirectTo: `${window.location.origin}`
+        }
+      });
+
+      if (signupError) {
+        if (signupError.message.includes('not authorized')) {
+          setError('This email domain is not allowed. Please contact support or use a different email.');
+        } else {
+          setError(signupError.message);
+        }
+        return;
+      }
+
+      if (data?.user) {
+        if (!data.user.confirmed_at) {
+          setError('Success! Please check your email for confirmation link.');
+          setFormData({
+            email: '',
+            password: '',
+            confirmPassword: '',
+            fullName: ''
+          });
+        } else {
+          const userData = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata?.full_name || formData.email.split('@')[0],
+          };
+          localStorage.setItem('user', JSON.stringify(userData));
+          navigate('/', { replace: true });
+        }
+      }
+    } catch (err) {
+      console.error('Signup error details:', err);
+      setError(err.message || 'An error occurred during sign up');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-      {/* Add background image div */}
       <div 
         className="fixed inset-0 bg-cover bg-center bg-fixed bg-no-repeat z-0"
         style={{
@@ -51,10 +98,8 @@ function SignUp() {
         }}
       />
       
-      {/* Add a semi-transparent overlay */}
       <div className="fixed inset-0 bg-gray-900 opacity-50 z-0" />
 
-      {/* Existing content with added z-10 for proper layering */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
@@ -149,9 +194,12 @@ function SignUp() {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800"
+                  disabled={isLoading}
+                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 ${
+                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Create account
+                  {isLoading ? 'Creating account...' : 'Create account'}
                 </button>
               </div>
             </form>
