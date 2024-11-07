@@ -1,52 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import { formatCurrency } from '../utils/format';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 // CarList component displays a grid of cars in the user's inventory
-function CarList() {
-  // State management for cars data, loading state, and potential errors
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function CarList({ cars, onDelete }) {
   const navigate = useNavigate();
-
-  // Fetch cars when component mounts
-  useEffect(() => {
-    fetchCars();
-  }, []);
-
-  // Fetches cars from Supabase database for the authenticated user
-  const fetchCars = async () => {
-    try {
-      // Check if user is authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        setError('Please sign in to view inventory');
-        setLoading(false);
-        return;
-      }
-
-      // Query cars table for user's inventory
-      const { data, error } = await supabase
-        .from('cars')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      console.log('Fetched cars:', data);
-      setCars(data);
-    } catch (error) {
-      console.error('Error fetching cars:', error);
-      setError('Failed to load cars');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Handles car deletion with confirmation
   const handleDelete = async (id, e) => {
@@ -62,8 +22,8 @@ function CarList() {
 
         if (error) throw error;
 
-        // Refresh the car list after successful deletion
-        fetchCars();
+        // Call the onDelete callback to refresh the list
+        if (onDelete) onDelete(id);
       } catch (error) {
         console.error('Error deleting car:', error);
         alert('Failed to delete car');
@@ -85,18 +45,8 @@ function CarList() {
     navigate(`/car/${id}`);
   };
 
-  // Loading state display
-  if (loading) {
-    return <div className="text-center p-4">Loading inventory...</div>;
-  }
-
-  // Error state display
-  if (error) {
-    return <div className="text-center text-red-500 p-4">{error}</div>;
-  }
-
   // Empty state display with CTA to add first car
-  if (cars.length === 0) {
+  if (!cars || cars.length === 0) {
     return (
       <div className="text-center p-4">
         <p className="mb-4">No cars in inventory yet.</p>
