@@ -1,8 +1,11 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react' // Import useState hook for state management
+import { useNavigate } from 'react-router-dom' // Import useNavigate hook for navigation
+import { supabase } from '../utils/supabaseClient' // Import Supabase client for database operations
 
+// MaintenancePage component definition
 function MaintenancePage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate() // Initialize navigate function for navigation
+  // Initialize state for maintenance data with default values
   const [maintenanceData, setMaintenanceData] = useState({
     vehicleId: '',
     serviceType: '',
@@ -10,6 +13,7 @@ function MaintenancePage() {
     notes: ''
   })
 
+  // Array of service types for the select input
   const serviceTypes = [
     'Oil Change',
     'Tire Rotation',
@@ -19,12 +23,33 @@ function MaintenancePage() {
     'Battery Check'
   ]
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Maintenance scheduled:', maintenanceData)
-    navigate('/')
+  // Function to handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault() // Prevent the default form submission behavior
+    try {
+      // Insert maintenance data into the database
+      const { data, error } = await supabase
+        .from('maintenance')
+        .insert([
+          {
+            vehicle_id: maintenanceData.vehicleId,
+            service_type: maintenanceData.serviceType,
+            scheduled_date: maintenanceData.scheduledDate,
+            notes: maintenanceData.notes
+          }
+        ])
+
+      if (error) throw error // Throw error if insertion fails
+
+      console.log('Maintenance scheduled:', data) // Log success message
+      navigate('/') // Navigate to the home page after successful submission
+    } catch (error) {
+      console.error('Error scheduling maintenance:', error) // Log error message
+      alert('Failed to schedule maintenance. Please try again.') // Alert user of failure
+    }
   }
 
+  // JSX for the component
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Schedule Maintenance</h2>

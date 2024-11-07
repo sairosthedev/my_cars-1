@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Stats from './Stats';
-import { createClient } from '@supabase/supabase-js'; // Import Supabase client
-
-// Initialize Supabase client
-const supabaseUrl = 'https://nunpqduylobuibdbiwdn.supabase.co'; // my supabase url
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51bnBxZHV5bG9idWliZGJpd2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA4MTU0NzIsImV4cCI6MjA0NjM5MTQ3Mn0.psNzOdRjUl0M94fH-gsNdh29S89nce3A4zL3rei37IY'; // my supabase anon key
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '../utils/supabaseClient';
 
 const Dashboard = () => {
   const [cars, setCars] = useState([]);

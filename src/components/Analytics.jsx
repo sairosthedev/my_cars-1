@@ -1,11 +1,13 @@
-import React, { useMemo, Suspense } from 'react'
+import { supabase } from '../utils/supabaseClient'; // Import Supabase client for database operations
+import React, { useEffect, useMemo, useState, Suspense } from 'react'; // Import React and its hooks for state management and side effects
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell,
   ResponsiveContainer 
-} from 'recharts'
-import { formatCurrency } from '../utils/format'
+} from 'recharts'; // Import Recharts for charting and visualization
+import { formatCurrency } from '../utils/format'; // Import utility function for formatting currency
 
+// Component for displaying loading state
 const LoadingState = () => (
   <div className="space-y-6">
     <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
@@ -20,37 +22,66 @@ const LoadingState = () => (
       ))}
     </div>
   </div>
-)
+);
 
-function Analytics({ cars }) {
+// Main Analytics component
+function Analytics() {
+  const [cars, setCars] = useState([]); // State for storing fetched car data
+  const [loading, setLoading] = useState(true); // State for tracking loading status
+  const [error, setError] = useState(''); // State for storing error messages
+
+  // Effect hook for fetching car data on component mount
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        // Fetch car data from Supabase
+        const { data, error } = await supabase
+          .from('cars')
+          .select('*');
+
+        if (error) throw error;
+
+        setCars(data); // Update state with fetched data
+      } catch (error) {
+        setError('Error fetching car data.'); // Update error state
+        console.error('Error fetching cars:', error); // Log error to console
+      } finally {
+        setLoading(false); // Set loading state to false after operation
+      }
+    };
+
+    fetchCars(); // Call the fetchCars function
+  }, []);
+
+  // Memoized function for calculating analytics
   const analytics = useMemo(() => {
-    if (!cars?.length) return null
+    if (!cars?.length) return null; // Return null if no cars data is available
 
     try {
       // Calculate distributions
       const makeDistribution = cars.reduce((acc, car) => {
-        acc[car.make] = (acc[car.make] || 0) + 1
-        return acc
-      }, {})
+        acc[car.make] = (acc[car.make] || 0) + 1;
+        return acc;
+      }, {});
 
       const yearDistribution = cars.reduce((acc, car) => {
-        acc[car.year] = (acc[car.year] || 0) + 1
-        return acc
-      }, {})
+        acc[car.year] = (acc[car.year] || 0) + 1;
+        return acc;
+      }, {});
 
       const priceRanges = {
         '0-50k': 0,
         '50k-100k': 0,
         '100k-150k': 0,
         '150k+': 0
-      }
+      };
 
       cars.forEach(car => {
-        if (car.price < 50000) priceRanges['0-50k']++
-        else if (car.price < 100000) priceRanges['50k-100k']++
-        else if (car.price < 150000) priceRanges['100k-150k']++
-        else priceRanges['150k+']++
-      })
+        if (car.price < 50000) priceRanges['0-50k']++;
+        else if (car.price < 100000) priceRanges['50k-100k']++;
+        else if (car.price < 150000) priceRanges['100k-150k']++;
+        else priceRanges['150k+']++;
+      });
 
       // Format data for charts
       const makeData = Object.entries(makeDistribution)
@@ -58,24 +89,24 @@ function Analytics({ cars }) {
           name: make,
           value: count
         }))
-        .sort((a, b) => b.value - a.value)
+        .sort((a, b) => b.value - a.value);
 
       const yearData = Object.entries(yearDistribution)
         .map(([year, count]) => ({
           year: parseInt(year),
           count
         }))
-        .sort((a, b) => a.year - b.year)
+        .sort((a, b) => a.year - b.year);
 
       const priceData = Object.entries(priceRanges)
         .map(([range, count]) => ({
           range,
           count
-        }))
+        }));
 
-      const totalValue = cars.reduce((sum, car) => sum + car.price, 0)
-      const averagePrice = totalValue / cars.length
-      const averageYear = Math.round(cars.reduce((sum, car) => sum + car.year, 0) / cars.length)
+      const totalValue = cars.reduce((sum, car) => sum + car.price, 0);
+      const averagePrice = totalValue / cars.length;
+      const averageYear = Math.round(cars.reduce((sum, car) => sum + car.year, 0) / cars.length);
 
       return {
         makeData,
@@ -85,17 +116,29 @@ function Analytics({ cars }) {
         averagePrice,
         averageYear,
         totalCars: cars.length
-      }
+      };
     } catch (error) {
-      console.error('Error calculating analytics:', error)
-      return null
+      console.error('Error calculating analytics:', error); // Log error to console
+      return null; // Return null if error occurs
     }
-  }, [cars])
+  }, [cars]);
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']; // Colors for charts
 
-  if (!cars) {
-    return <LoadingState />
+  // Conditional rendering based on loading and error states
+  if (loading) {
+    return <LoadingState />; // Display loading state if loading is true
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">Fleet Analytics</h1>
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   if (!analytics) {
@@ -106,9 +149,10 @@ function Analytics({ cars }) {
           <p className="text-gray-600">No data available for analysis</p>
         </div>
       </div>
-    )
+    );
   }
 
+  // Main component rendering
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -212,7 +256,7 @@ function Analytics({ cars }) {
         </div>
       </Suspense>
     </div>
-  )
+  );
 }
 
-export default Analytics
+export default Analytics;

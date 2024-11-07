@@ -4,8 +4,6 @@ import { supabase } from '../utils/supabaseClient';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { 
   Form, 
@@ -492,39 +490,37 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
 
               <FormItem>
                 <FormLabel>Transmission</FormLabel>
-                <Select
-                  value={formState.transmission}
-                  onValueChange={(value) => handleSelectChange('transmission', value)}
-                >
-                  <SelectTrigger className={errors.transmission ? 'border-red-500' : ''}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="automatic">Automatic</SelectItem>
-                    <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="cvt">CVT</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.transmission && <FormMessage className="text-red-500">{errors.transmission}</FormMessage>}
+                <FormControl>
+                  <select
+                    name="transmission"
+                    value={formState.transmission}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  >
+                    <option value="automatic">Automatic</option>
+                    <option value="manual">Manual</option>
+                    <option value="cvt">CVT</option>
+                  </select>
+                </FormControl>
+                {errors.transmission && <FormMessage>{errors.transmission}</FormMessage>}
               </FormItem>
 
               <FormItem>
                 <FormLabel>Fuel Type</FormLabel>
-                <Select
-                  value={formState.fuelType}
-                  onValueChange={(value) => handleSelectChange('fuelType', value)}
-                >
-                  <SelectTrigger className={errors.fuelType ? 'border-red-500' : ''}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="petrol">Petrol</SelectItem>
-                    <SelectItem value="diesel">Diesel</SelectItem>
-                    <SelectItem value="electric">Electric</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.fuelType && <FormMessage className="text-red-500">{errors.fuelType}</FormMessage>}
+                <FormControl>
+                  <select
+                    name="fuelType"
+                    value={formState.fuelType}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  >
+                    <option value="petrol">Petrol</option>
+                    <option value="diesel">Diesel</option>
+                    <option value="electric">Electric</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                </FormControl>
+                {errors.fuelType && <FormMessage>{errors.fuelType}</FormMessage>}
               </FormItem>
             </div>
 
@@ -633,13 +629,15 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea
+                <textarea
                   name="notes"
                   value={formState.notes}
                   onChange={handleChange}
                   rows={4}
                   placeholder="Enter any additional notes about the vehicle"
-                  className={errors.notes ? 'border-red-500' : ''}
+                  className={`w-full rounded-md border border-input bg-background px-3 py-2 ${
+                    errors.notes ? 'border-red-500' : ''
+                  }`}
                 />
               </FormControl>
               {errors.notes && <FormMessage className="text-red-500">{errors.notes}</FormMessage>}

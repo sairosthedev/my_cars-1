@@ -1,6 +1,7 @@
 import { CurrencyDollarIcon, CalendarIcon, TruckIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { formatCurrency } from '../utils/format'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../utils/supabaseClient'
 
 function Stats({ totalValue, carCount, averageYear, onExportData }) {
   const navigate = useNavigate()
@@ -13,21 +14,54 @@ function Stats({ totalValue, carCount, averageYear, onExportData }) {
 
   const handleExportData = async () => {
     try {
+      // Fetch all vehicles from Supabase
+      const { data: vehicles, error } = await supabase
+        .from('vehicles')
+        .select('*')
+
+      if (error) throw error
+
+      // Prepare CSV headers and data
+      const headers = ['ID', 'Make', 'Model', 'Year', 'Value', 'Last Maintenance']
+      const rows = vehicles.map(vehicle => [
+        vehicle.id,
+        vehicle.make,
+        vehicle.model,
+        vehicle.year,
+        vehicle.value,
+        vehicle.last_maintenance
+      ])
+
       const csvContent = [
-        ['Total Fleet Value', 'Fleet Size', 'Average Model Year', 'Capacity Utilization'],
-        [totalValue, carCount, averageYear, `${utilizationPercentage}%`]
+        headers,
+        ...rows
       ].map(row => row.join(',')).join('\n')
 
+      // Create and download the file
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       
       link.setAttribute('href', url)
-      link.setAttribute('download', `fleet_stats_${new Date().toISOString().split('T')[0]}.csv`)
+      link.setAttribute('download', `fleet_export_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+
+      // Store export log in Supabase
+      const { error: logError } = await supabase
+        .from('export_logs')
+        .insert([
+          {
+            exported_at: new Date().toISOString(),
+            record_count: vehicles.length,
+            total_value: totalValue
+          }
+        ])
+
+      if (logError) throw logError
+
     } catch (error) {
       console.error('Error exporting data:', error)
       alert('Failed to export data. Please try again.')
