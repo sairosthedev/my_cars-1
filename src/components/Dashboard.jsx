@@ -1,6 +1,46 @@
+import React, { useEffect, useState } from 'react';
 import Stats from './Stats';
+import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
-const Dashboard = ({ cars }) => {
+// Initialize Supabase client
+const supabaseUrl = 'https://nunpqduylobuibdbiwdn.supabase.co'; // my supabase url
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51bnBxZHV5bG9idWliZGJpd2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA4MTU0NzIsImV4cCI6MjA0NjM5MTQ3Mn0.psNzOdRjUl0M94fH-gsNdh29S89nce3A4zL3rei37IY'; // my supabase anon key
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const Dashboard = () => {
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cars') // my table name
+          .select('*');
+
+        if (error) throw error;
+
+        setCars(data);
+      } catch (error) {
+        setError('Error fetching car data.');
+        console.error('Error fetching cars:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   const totalValue = cars.reduce((sum, car) => sum + car.price, 0);
   const averageYear = Math.round(cars.reduce((sum, car) => sum + car.year, 0) / cars.length) || 0;
 
@@ -27,7 +67,7 @@ const Dashboard = ({ cars }) => {
               <p className="text-gray-600 mt-1">{car.year}</p>
               <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
                 <span>{car.transmission}</span>
-                <span>{car.fuel_type}</span>
+                <span>{car.fuelType}</span>
               </div>
             </div>
           </div>
