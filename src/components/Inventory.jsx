@@ -10,7 +10,6 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  // Fetch cars when component mounts
   useEffect(() => {
     fetchCars();
   }, []);
@@ -43,7 +42,7 @@ const Inventory = () => {
   };
 
   const handleDelete = async (id) => {
-    await fetchCars(); // Refresh the list after deletion
+    await fetchCars();
   };
 
   const filteredCars = cars
@@ -68,11 +67,19 @@ const Inventory = () => {
     });
 
   if (loading) {
-    return <div className="text-center p-4">Loading inventory...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-900"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500 p-4">{error}</div>;
+    return (
+      <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
   }
 
   return (

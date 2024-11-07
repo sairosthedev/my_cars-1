@@ -6,42 +6,38 @@ import {
 } from 'recharts'
 import { formatCurrency } from '../utils/format'
 
-// Loading component
 const LoadingState = () => (
-  <div className="animate-pulse">
-    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+  <div className="space-y-6">
+    <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       {[1, 2, 3].map(i => (
-        <div key={i} className="h-32 bg-gray-200 rounded-2xl"></div>
+        <div key={i} className="h-32 bg-gray-200 rounded-2xl animate-pulse"></div>
       ))}
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {[1, 2, 3].map(i => (
-        <div key={i} className="h-[300px] bg-gray-200 rounded-2xl"></div>
+        <div key={i} className="h-[300px] bg-gray-200 rounded-2xl animate-pulse"></div>
       ))}
     </div>
   </div>
 )
 
 function Analytics({ cars }) {
-  // Memoized calculations for performance
   const analytics = useMemo(() => {
     if (!cars?.length) return null
 
     try {
-      // Calculate make distribution
+      // Calculate distributions
       const makeDistribution = cars.reduce((acc, car) => {
         acc[car.make] = (acc[car.make] || 0) + 1
         return acc
       }, {})
 
-      // Calculate year distribution
       const yearDistribution = cars.reduce((acc, car) => {
         acc[car.year] = (acc[car.year] || 0) + 1
         return acc
       }, {})
 
-      // Calculate price ranges
       const priceRanges = {
         '0-50k': 0,
         '50k-100k': 0,
@@ -62,7 +58,7 @@ function Analytics({ cars }) {
           name: make,
           value: count
         }))
-        .sort((a, b) => b.value - a.value) // Sort by count descending
+        .sort((a, b) => b.value - a.value)
 
       const yearData = Object.entries(yearDistribution)
         .map(([year, count]) => ({
@@ -116,43 +112,38 @@ function Analytics({ cars }) {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Fleet Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Fleet Analytics</h1>
         <p className="text-sm text-gray-500">
           Last updated: {new Date().toLocaleDateString()}
         </p>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
           <h3 className="text-lg font-semibold text-gray-600 mb-2">Total Fleet Value</h3>
-          <p className="text-3xl font-bold">{formatCurrency(analytics.totalValue)}</p>
+          <p className="text-3xl font-bold text-gray-900">{formatCurrency(analytics.totalValue)}</p>
           <p className="text-sm text-gray-500 mt-2">
             Avg. per vehicle: {formatCurrency(analytics.averagePrice)}
           </p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
           <h3 className="text-lg font-semibold text-gray-600 mb-2">Fleet Size</h3>
-          <p className="text-3xl font-bold">{analytics.totalCars} vehicles</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Active in fleet
-          </p>
+          <p className="text-3xl font-bold text-gray-900">{analytics.totalCars} vehicles</p>
+          <p className="text-sm text-gray-500 mt-2">Active in fleet</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
           <h3 className="text-lg font-semibold text-gray-600 mb-2">Average Year</h3>
-          <p className="text-3xl font-bold">{analytics.averageYear}</p>
+          <p className="text-3xl font-bold text-gray-900">{analytics.averageYear}</p>
           <p className="text-sm text-gray-500 mt-2">
             Fleet age: {new Date().getFullYear() - analytics.averageYear} years
           </p>
         </div>
       </div>
 
-      {/* Charts Grid */}
       <Suspense fallback={<LoadingState />}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Make Distribution */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-4">Make Distribution</h3>
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Make Distribution</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -176,9 +167,8 @@ function Analytics({ cars }) {
             </div>
           </div>
 
-          {/* Year Distribution */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-4">Year Distribution</h3>
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Year Distribution</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analytics.yearData}>
@@ -200,9 +190,8 @@ function Analytics({ cars }) {
             </div>
           </div>
 
-          {/* Price Range Distribution */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-4">Price Range Distribution</h3>
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Price Range Distribution</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.priceData}>

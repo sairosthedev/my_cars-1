@@ -38,7 +38,7 @@ function NavBar({ setActiveView }) {
     <div className="w-full bg-gradient-to-r from-red-900 to-red-800 shadow-md border-b-4 border-amber-400">
       <nav className="flex items-center justify-between relative px-6 py-4">
         <div className="flex items-center group">
-          <GiSteeringWheel className="text-2xl text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
+          <GiSteeringWheel className="text-2xl text-amber-400 transition-transform duration-500 group-hover:rotate-180" />
           <span className="ml-2 font-bold text-xl text-white tracking-wider">
             Auto<span className="text-amber-400">Track</span>
           </span>

@@ -48,151 +48,109 @@ function CarDetails() {
 
   // Loading state handler
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="p-4 text-center">Loading...</div>;
   }
 
   // Error state handler
   if (error) {
-    return <div>{error}</div>;
+    return <div className="p-4 text-red-500 text-center">{error}</div>;
   }
 
   // Handle case where car data is not found
   if (!car) {
-    return <div>Car not found</div>;
+    return <div className="p-4 text-center">Car not found</div>;
   }
 
   return (
-    // Main container with vintage-style background
-    <div style={{ 
-      backgroundColor: '#F8F4E3',
-      padding: '20px',
-      borderRadius: '8px',
-      border: '2px solid #800000',
-      maxWidth: '1000px',
-      margin: '20px auto',
-      backgroundImage: 'url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1000")',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      position: 'relative'
-    }}>
-      {/* Semi-transparent overlay for better readability */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(248, 244, 227, 0.95)',
-        borderRadius: '8px',
-      }} />
+    <div className="bg-[#F8F4E3] p-5 rounded-lg border-2 border-red-900 max-w-4xl mx-auto my-5 relative overflow-hidden">
+      <div className="absolute inset-0 bg-cover bg-center opacity-10 z-0"
+           style={{backgroundImage: 'url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1000")'}} />
       
-      {/* Content container */}
-      <div style={{ position: 'relative' }}>
-        {/* Back to inventory navigation link */}
+      <div className="relative z-10">
         <Link
           to="/inventory"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            color: '#800000',
-            marginBottom: '20px',
-            textDecoration: 'none'
-          }}
+          className="inline-flex items-center gap-2 text-red-900 hover:text-red-700 mb-5 transition-colors"
         >
-          <ArrowLeftIcon style={{ width: '20px', height: '20px' }} />
+          <ArrowLeftIcon className="w-5 h-5" />
           Back to Inventory
         </Link>
 
-        {/* Main content card */}
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '8px',
-          border: '1px solid #DAA520',
-        }}>
-          {/* Car header with image and basic info */}
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+        <div className="bg-white p-8 rounded-lg border border-amber-500 shadow-lg">
+          <div className="flex flex-col md:flex-row gap-6 mb-8">
             <img 
               src={car.image} 
               alt={`${car.make} ${car.model}`} 
-              style={{
-                width: '300px',
-                height: '200px',
-                objectFit: 'cover',
-                borderRadius: '8px'
-              }}
+              className="w-full md:w-96 h-64 object-cover rounded-lg"
             />
             <div>
-              <h1 style={{ color: '#800000', fontSize: '24px', marginBottom: '10px' }}>
+              <h1 className="text-2xl font-bold text-red-900 mb-2">
                 {car.make} {car.model}
               </h1>
-              <p style={{ color: '#DAA520', fontSize: '18px' }}>
+              <p className="text-xl text-amber-500">
                 {car.year} • {formatCurrency(car.price)}
               </p>
             </div>
           </div>
 
-          {/* Detailed information sections */}
-          <div style={{ display: 'grid', gap: '30px' }}>
+          <div className="space-y-8">
             {/* Basic Information */}
             <section>
-              <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              <h2 className="text-xl font-semibold text-amber-500 border-b-2 border-amber-500 pb-2 mb-4">
                 Basic Information
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                <p><strong>Make:</strong> {car.make}</p>
-                <p><strong>Model:</strong> {car.model}</p>
-                <p><strong>Year:</strong> {car.year}</p>
-                <p><strong>Price:</strong> {formatCurrency(car.price)}</p>
-                <p><strong>Mileage:</strong> {car.mileage}</p>
-                <p><strong>Color:</strong> {car.color}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p><span className="font-semibold">Make:</span> {car.make}</p>
+                <p><span className="font-semibold">Model:</span> {car.model}</p>
+                <p><span className="font-semibold">Year:</span> {car.year}</p>
+                <p><span className="font-semibold">Price:</span> {formatCurrency(car.price)}</p>
+                <p><span className="font-semibold">Mileage:</span> {car.mileage}</p>
+                <p><span className="font-semibold">Color:</span> {car.color}</p>
               </div>
             </section>
 
             {/* Vehicle Details */}
             <section>
-              <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              <h2 className="text-xl font-semibold text-amber-500 border-b-2 border-amber-500 pb-2 mb-4">
                 Vehicle Details
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                <p><strong>VIN:</strong> {car.vin}</p>
-                <p><strong>License Plate:</strong> {car.licensePlate}</p>
-                <p><strong>Transmission:</strong> {car.transmission}</p>
-                <p><strong>Fuel Type:</strong> {car.fuelType}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p><span className="font-semibold">VIN:</span> {car.vin}</p>
+                <p><span className="font-semibold">License Plate:</span> {car.licensePlate}</p>
+                <p><span className="font-semibold">Transmission:</span> {car.transmission}</p>
+                <p><span className="font-semibold">Fuel Type:</span> {car.fuelType}</p>
               </div>
             </section>
 
             {/* Service Information */}
             <section>
-              <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              <h2 className="text-xl font-semibold text-amber-500 border-b-2 border-amber-500 pb-2 mb-4">
                 Service Information
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                <p><strong>Last Service:</strong> {car.lastServiceDate}</p>
-                <p><strong>Next Service Due:</strong> {car.nextServiceDue}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p><span className="font-semibold">Last Service:</span> {car.lastServiceDate}</p>
+                <p><span className="font-semibold">Next Service Due:</span> {car.nextServiceDue}</p>
               </div>
             </section>
 
             {/* Insurance Information */}
             <section>
-              <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+              <h2 className="text-xl font-semibold text-amber-500 border-b-2 border-amber-500 pb-2 mb-4">
                 Insurance Information
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                <p><strong>Provider:</strong> {car.insurance?.provider}</p>
-                <p><strong>Policy Number:</strong> {car.insurance?.policyNumber}</p>
-                <p><strong>Expiry Date:</strong> {car.insurance?.expiryDate}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p><span className="font-semibold">Provider:</span> {car.insurance?.provider}</p>
+                <p><span className="font-semibold">Policy Number:</span> {car.insurance?.policyNumber}</p>
+                <p><span className="font-semibold">Expiry Date:</span> {car.insurance?.expiryDate}</p>
               </div>
             </section>
 
             {/* Notes */}
             {car.notes && (
               <section>
-                <h2 style={{ color: '#DAA520', marginBottom: '15px', borderBottom: '2px solid #DAA520', paddingBottom: '5px' }}>
+                <h2 className="text-xl font-semibold text-amber-500 border-b-2 border-amber-500 pb-2 mb-4">
                   Notes
                 </h2>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{car.notes}</p>
+                <p className="whitespace-pre-wrap">{car.notes}</p>
               </section>
             )}
           </div>

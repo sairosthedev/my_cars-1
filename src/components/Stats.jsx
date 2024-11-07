@@ -7,27 +7,17 @@ function Stats({ totalValue, carCount, averageYear, onExportData }) {
   const utilizationPercentage = Math.min(100, (carCount / 10) * 100)
   const currentYear = new Date().getFullYear()
 
-  const handleAddVehicle = () => {
-    navigate('/add')
-  }
-
-  const handleScheduleMaintenance = () => {
-    navigate('/maintenance')
-  }
-
-  const handleAnalytics = () => {
-    navigate('/analytics')
-  }
+  const handleAddVehicle = () => navigate('/add')
+  const handleScheduleMaintenance = () => navigate('/maintenance')
+  const handleAnalytics = () => navigate('/analytics')
 
   const handleExportData = async () => {
     try {
-      // Create CSV content
       const csvContent = [
         ['Total Fleet Value', 'Fleet Size', 'Average Model Year', 'Capacity Utilization'],
         [totalValue, carCount, averageYear, `${utilizationPercentage}%`]
       ].map(row => row.join(',')).join('\n')
 
-      // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -48,25 +38,33 @@ function Stats({ totalValue, carCount, averageYear, onExportData }) {
     { 
       name: 'Add Vehicle', 
       icon: '🚗', 
-      color: 'blue',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+      textColor: 'text-blue-700',
       onClick: handleAddVehicle 
     },
     { 
       name: 'Schedule Maintenance', 
       icon: '🔧', 
-      color: 'emerald',
+      bgColor: 'bg-emerald-50',
+      hoverBg: 'hover:bg-emerald-100',
+      textColor: 'text-emerald-700',
       onClick: handleScheduleMaintenance 
     },
     { 
       name: 'Analytics', 
       icon: '📊', 
-      color: 'indigo',
+      bgColor: 'bg-indigo-50',
+      hoverBg: 'hover:bg-indigo-100',
+      textColor: 'text-indigo-700',
       onClick: handleAnalytics 
     },
     { 
       name: 'Export Data', 
       icon: '📤', 
-      color: 'orange',
+      bgColor: 'bg-orange-50',
+      hoverBg: 'hover:bg-orange-100',
+      textColor: 'text-orange-700',
       onClick: handleExportData 
     }
   ]
@@ -119,7 +117,9 @@ function Stats({ totalValue, carCount, averageYear, onExportData }) {
               <p className="text-sm font-medium text-gray-600">Average Model Year</p>
               <p className="text-2xl font-bold text-gray-900">{averageYear || 'N/A'}</p>
               <p className="mt-1.5 text-sm text-gray-500">
-                Average age: <span className="text-indigo-600 font-medium">{averageYear ? `${currentYear - averageYear} years` : 'N/A'}</span>
+                Average age: <span className="text-indigo-600 font-medium">
+                  {averageYear ? `${currentYear - averageYear} years` : 'N/A'}
+                </span>
               </p>
             </div>
           </div>
@@ -149,12 +149,12 @@ function Stats({ totalValue, carCount, averageYear, onExportData }) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Management Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {actions.map(({ name, icon, color, onClick }, index) => (
+          {actions.map(({ name, icon, bgColor, hoverBg, textColor, onClick }, index) => (
             <button
               key={index}
               onClick={onClick}
               className={`px-4 py-3 rounded-xl text-sm font-medium
-                bg-${color}-50 text-${color}-700 hover:bg-${color}-100
+                ${bgColor} ${textColor} ${hoverBg}
                 transition-all duration-200 flex items-center justify-center space-x-2
                 hover:scale-[1.02] active:scale-[0.98]`}
             >

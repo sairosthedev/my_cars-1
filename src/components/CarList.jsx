@@ -48,11 +48,11 @@ function CarList({ cars, onDelete }) {
   // Empty state display with CTA to add first car
   if (!cars || cars.length === 0) {
     return (
-      <div className="text-center p-4">
-        <p className="mb-4">No cars in inventory yet.</p>
+      <div className="text-center p-8">
+        <p className="text-gray-600 mb-4">No cars in inventory yet.</p>
         <Link 
           to="/add"
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors"
+          className="inline-block bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors duration-200"
         >
           Add Your First Car
         </Link>
@@ -68,7 +68,7 @@ function CarList({ cars, onDelete }) {
         <h2 className="text-2xl font-bold text-red-800">Your Inventory</h2>
         <Link 
           to="/add"
-          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900 transition-colors"
+          className="bg-red-800 text-white px-6 py-2 rounded-lg hover:bg-red-900 transition-colors duration-200"
         >
           Add New Car
         </Link>
@@ -112,21 +112,21 @@ function CarList({ cars, onDelete }) {
               <div className="mt-4 flex justify-end space-x-2 border-t pt-4">
                 <button
                   onClick={(e) => handleView(car.id, e)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
                   title="View Details"
                 >
                   <EyeIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={(e) => handleEdit(car.id, e)}
-                  className="p-2 text-green-600 hover:bg-green-50 rounded-full"
+                  className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors duration-200"
                   title="Edit Car"
                 >
                   <PencilIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={(e) => handleDelete(car.id, e)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
                   title="Delete Car"
                 >
                   <TrashIcon className="h-5 w-5" />

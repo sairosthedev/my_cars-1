@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { GiSteeringWheel } from 'react-icons/gi';
-import { createClient } from '@supabase/supabase-js';
-
-//initialize supabase client
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from '../../utils/supabaseClient';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -17,12 +11,11 @@ function SignUp() {
     fullName: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is already authenticated
   const isAuthenticated = localStorage.getItem('user');
   
-  // If already authenticated, redirect to dashboard
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
@@ -37,8 +30,12 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
     
@@ -53,38 +50,23 @@ function SignUp() {
         }
       });
 
-      if (signupError) {
-        setError(signupError.message);
-        return;
-      }
+      if (signupError) throw signupError;
 
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/');
       }
     } catch (err) {
-      setError('An error occurred during sign up');
+      setError(err.message || 'An error occurred during sign up');
       console.error('Sign up error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-      {/* Add background image div */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-fixed bg-no-repeat z-0"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2066&auto=format&fit=crop')",
-          minHeight: '100vh',
-          width: '100vw'
-        }}
-      />
-      
-      {/* Add a semi-transparent overlay */}
-      <div className="fixed inset-0 bg-gray-900 opacity-50 z-0" />
-
-      {/* Existing content with added z-10 for proper layering */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+    <div className="auth-page">
+      <div className="w-full relative z-10">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
             <GiSteeringWheel className="text-4xl text-white" />
@@ -99,7 +81,7 @@ function SignUp() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 border-t-4 border-amber-400">
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-500 text-red-500 px-4 py-3 rounded relative">
                   {error}
@@ -110,79 +92,81 @@ function SignUp() {
                 <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
                   Full Name
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    required
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
-                  />
-                </div>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                />
               </div>
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email address
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
-                  />
-                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                />
               </div>
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
-                  />
-                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                />
               </div>
 
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
-                  />
-                </div>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                />
               </div>
 
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800"
-                >
-                  Create account
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 ${
+                  isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account...
+                  </span>
+                ) : (
+                  'Create account'
+                )}
+              </button>
             </form>
 
             <div className="mt-6">

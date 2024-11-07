@@ -9,7 +9,7 @@ const Layout = ({ children, isAuthenticated, successMessage }) => {
           <NavBar />
         </nav>
       )}
-      <div className={`container mx-auto px-4 ${isAuthenticated ? 'pt-4' : ''} flex-grow`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full ${isAuthenticated ? 'pt-4' : ''} flex-grow`}>
         {successMessage && isAuthenticated && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {successMessage}
