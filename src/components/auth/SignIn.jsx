@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GiSteeringWheel } from 'react-icons/gi';
-import { supabase } from '../../utils/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
+
+//initialize supabase client
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 function SignIn() {
   const [email, setEmail] = useState('');
@@ -9,6 +15,14 @@ function SignIn() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Move authentication check to useEffect
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

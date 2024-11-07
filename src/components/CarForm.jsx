@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabaseClient';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,10 +16,15 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
+/**
+ * CarForm Component
+ * Handles both creation and editing of car entries
+ * @param {Object} initialData - Existing car data for editing (optional)
+ * @param {boolean} isSubmitting - Form submission state
+ */
+const CarForm = ({ initialData, isSubmitting = false }) => {
+  // Initialize form state with default values
   const [formState, setFormState] = useState({
     make: '',
     model: '',
@@ -29,7 +36,7 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     licensePlate: '',
     color: '',
     transmission: 'automatic',
-    fuelType: 'gasoline',
+    fuelType: 'petrol',
     lastServiceDate: '',
     nextServiceDue: '',
     insurance: {
@@ -40,16 +47,22 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     notes: ''
   });
   
+  // State for form validation and error handling
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
 
+  // Populate form with initial data if editing existing car
   useEffect(() => {
     if (initialData) {
       setFormState(initialData);
     }
   }, [initialData]);
 
+  /**
+   * Validates all form fields and returns whether the form is valid
+   * @returns {boolean} - True if form is valid, false otherwise
+   */
   const validateForm = () => {
     const newErrors = {};
     const currentYear = new Date().getFullYear();
@@ -175,59 +188,82 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handles form submission
+   * Validates form and saves car data to Supabase
+   * @param {Event} e - Form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
     
-    console.log('Form submitted, validating...');
-    
     if (validateForm()) {
-      console.log('Validation passed, submitting form data:', formState);
       try {
-        const result = await onSubmit(formState);
-        console.log('Submission result:', result);
+        console.log('Starting form submission...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (!initialData && result) {
-          setFormState({
-            make: '',
-            model: '',
-            year: new Date().getFullYear(),
-            price: '',
-            mileage: '',
-            image: '',
-            vin: '',
-            licensePlate: '',
-            color: '',
-            transmission: 'automatic',
-            fuelType: 'gasoline',
-            lastServiceDate: '',
-            nextServiceDue: '',
-            insurance: {
-              provider: '',
-              policyNumber: '',
-              expiryDate: ''
-            },
-            notes: ''
-          });
-          setErrors({});
-          
-          setTimeout(() => {
-            navigate('/inventory');
-          }, 2000);
+        if (sessionError) {
+          console.error('Authentication error:', sessionError);
+          throw new Error('Authentication error occurred')
         }
+
+        if (!session) {
+          console.error('No session found');
+          throw new Error('Please sign in to add a car')
+        }
+
+        console.log('User session:', session);
+
+        const carData = {
+          make: formState.make,
+          model: formState.model,
+          year: parseInt(formState.year),
+          price: parseFloat(formState.price),
+          mileage: parseInt(formState.mileage),
+          image: formState.image,
+          vin: formState.vin,
+          license_plate: formState.licensePlate,
+          color: formState.color,
+          transmission: formState.transmission,
+          fuel_type: formState.fuelType,
+          last_service_date: formState.lastServiceDate,
+          next_service_due: formState.nextServiceDue,
+          insurance: formState.insurance,
+          notes: formState.notes,
+          user_id: session.user.id
+        };
+
+        console.log('Submitting car data:', carData);
+
+        const { data, error } = await supabase
+          .from('cars')
+          .insert([carData])
+          .select();
+
+        if (error) {
+          console.error('Database error:', error);
+          throw error;
+        }
+
+        console.log('Successfully added car:', data);
+        navigate('/inventory');
+
       } catch (error) {
         console.error('Submission error:', error);
         setSubmitError(error.message || 'Failed to save car details. Please try again.');
       }
-    } else {
-      console.log('Validation failed, errors:', errors);
     }
   };
 
+  /**
+   * Handles changes to form input fields
+   * @param {Event} e - Input change event
+   */
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     const processedValue = type === 'number' ? (value === '' ? '' : Number(value)) : value;
     
+    // Handle nested insurance fields
     if (name.startsWith('insurance.')) {
       const [_, field] = name.split('.');
       setFormState(prev => ({
@@ -251,6 +287,11 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     }
   };
 
+  /**
+   * Handles changes to select/dropdown fields
+   * @param {string} name - Field name
+   * @param {string} value - Selected value
+   */
   const handleSelectChange = (name, value) => {
     setFormState(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -262,8 +303,43 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
     }
   };
 
+  /**
+   * Debug function to check existing cars in database
+   * Useful for development and troubleshooting
+   */
+  const checkExistingCars = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('No authenticated session');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('user_id', session.user.id);
+      
+      if (error) {
+        console.error('Error fetching cars:', error);
+      } else {
+        console.log('All cars in database:', data);
+      }
+    } catch (error) {
+      console.error('Error checking cars:', error);
+    }
+  };
+
+  // Check existing cars on component mount
+  useEffect(() => {
+    checkExistingCars();
+  }, []);
+
+  // Render form UI
   return (
     <Card className="w-full max-w-4xl mx-auto bg-card relative overflow-hidden">
+      {/* Background image overlay */}
       <div 
         className="absolute inset-0 z-0" 
         style={{
@@ -274,6 +350,7 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
         }}
       />
       
+      {/* Form content */}
       <div className="relative z-10">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
@@ -441,7 +518,7 @@ const CarForm = ({ onSubmit, initialData, isSubmitting = false }) => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gasoline">Gasoline</SelectItem>
+                    <SelectItem value="petrol">Petrol</SelectItem>
                     <SelectItem value="diesel">Diesel</SelectItem>
                     <SelectItem value="electric">Electric</SelectItem>
                     <SelectItem value="hybrid">Hybrid</SelectItem>

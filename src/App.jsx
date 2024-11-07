@@ -246,7 +246,7 @@ function App() {
               path="/inventory"
               element={
                 <ProtectedRoute>
-                  {renderInventory()}
+                  <CarList />
                 </ProtectedRoute>
               }
             />
@@ -254,11 +254,7 @@ function App() {
               path="/add"
               element={
                 <ProtectedRoute>
-                  <CarForm
-                    onSubmit={handleAddCar}
-                    isSubmitting={false}
-                    successMessage={successMessage}
-                  />
+                  <CarForm />
                 </ProtectedRoute>
               }
             />
@@ -266,10 +262,7 @@ function App() {
               path="/edit/:id"
               element={
                 <ProtectedRoute>
-                  <CarForm
-                    onSubmit={updateCar}
-                    initialData={editingCar}
-                  />
+                  <CarForm />
                 </ProtectedRoute>
               }
             />
@@ -277,7 +270,7 @@ function App() {
               path="/car/:id"
               element={
                 <ProtectedRoute>
-                  <CarDetails cars={cars} />
+                  <CarDetails />
                 </ProtectedRoute>
               }
             />

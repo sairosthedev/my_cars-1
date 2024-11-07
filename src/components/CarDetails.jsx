@@ -1,17 +1,68 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { formatCurrency } from '../utils/format';
+import { supabase } from '../utils/supabaseClient';
 
-function CarDetails({ cars }) {
+/**
+ * CarDetails component displays detailed information about a specific car
+ * Fetches car data from Supabase based on the ID from URL parameters
+ */
+function CarDetails() {
+  // Get car ID from URL parameters
   const { id } = useParams();
-  const car = cars.find(c => c.id === id);
+  
+  // State management for car data, loading state, and potential errors
+  const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  useEffect(() => {
+    /**
+     * Fetches car details from Supabase database
+     * Sets loading state while fetching and handles potential errors
+     */
+    const fetchCarDetails = async () => {
+      try {
+        console.log('Fetching car with ID:', id);
+        const { data, error } = await supabase
+          .from('cars')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        console.log('Fetched car data:', data);
+        setCar(data);
+      } catch (error) {
+        console.error('Error fetching car details:', error);
+        setError('Car not found or an error occurred.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarDetails();
+  }, [id]);
+
+  // Loading state handler
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Error state handler
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  // Handle case where car data is not found
   if (!car) {
     return <div>Car not found</div>;
   }
 
   return (
+    // Main container with vintage-style background
     <div style={{ 
       backgroundColor: '#F8F4E3',
       padding: '20px',
@@ -24,6 +75,7 @@ function CarDetails({ cars }) {
       backgroundPosition: 'center',
       position: 'relative'
     }}>
+      {/* Semi-transparent overlay for better readability */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -34,9 +86,11 @@ function CarDetails({ cars }) {
         borderRadius: '8px',
       }} />
       
+      {/* Content container */}
       <div style={{ position: 'relative' }}>
+        {/* Back to inventory navigation link */}
         <Link
-          to="/"
+          to="/inventory"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -50,12 +104,14 @@ function CarDetails({ cars }) {
           Back to Inventory
         </Link>
 
+        {/* Main content card */}
         <div style={{
           backgroundColor: 'white',
           padding: '30px',
           borderRadius: '8px',
           border: '1px solid #DAA520',
         }}>
+          {/* Car header with image and basic info */}
           <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
             <img 
               src={car.image} 
@@ -77,6 +133,7 @@ function CarDetails({ cars }) {
             </div>
           </div>
 
+          {/* Detailed information sections */}
           <div style={{ display: 'grid', gap: '30px' }}>
             {/* Basic Information */}
             <section>
