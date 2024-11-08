@@ -2,43 +2,55 @@ import React, { useEffect, useState } from 'react';
 import Stats from './Stats';
 import { supabase } from '../utils/supabaseClient';
 
+// Dashboard component definition
 const Dashboard = () => {
+  // State hooks for managing cars data, loading state, and error messages
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // useEffect hook to fetch cars data on component mount
   useEffect(() => {
     const fetchCars = async () => {
       try {
+        // Fetching cars data from Supabase
         const { data, error } = await supabase
           .from('cars') // my table name
           .select('*');
 
         if (error) throw error;
 
+        // Updating state with fetched cars data
         setCars(data);
       } catch (error) {
+        // Handling errors during data fetching
         setError('Error fetching car data.');
         console.error('Error fetching cars:', error);
       } finally {
+        // Setting loading state to false after the operation
         setLoading(false);
       }
     };
 
+    // Calling the fetchCars function
     fetchCars();
   }, []);
 
+  // Conditional rendering based on loading state
   if (loading) {
     return <div>Loading...</div>;
   }
 
+  // Conditional rendering based on error state
   if (error) {
     return <div>{error}</div>;
   }
 
+  // Calculating total value and average year of cars
   const totalValue = cars.reduce((sum, car) => sum + car.price, 0);
   const averageYear = Math.round(cars.reduce((sum, car) => sum + car.year, 0) / cars.length) || 0;
 
+  // Rendering the dashboard with stats and car cards
   return (
     <div className="space-y-8">
       <Stats 

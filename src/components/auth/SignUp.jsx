@@ -14,8 +14,8 @@ function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user is authenticated and redirect if so
   const isAuthenticated = localStorage.getItem('user');
-  
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
@@ -38,8 +38,9 @@ function SignUp() {
       setIsLoading(false);
       return;
     }
-    
+
     try {
+      // Sign up using Supabase's auth API
       const { data, error: signupError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -50,15 +51,27 @@ function SignUp() {
         }
       });
 
-      if (signupError) throw signupError;
+      if (signupError) {
+        // Log the error for debugging
+        console.error('Signup Error:', signupError.message);
+
+        // Set user-friendly error messages based on Supabase error response
+        if (signupError.message.includes('not authorized')) {
+          setError('This email address is not authorized for sign-up.');
+        } else {
+          setError(signupError.message);
+        }
+        return;
+      }
 
       if (data.user) {
+        // Store user data in local storage and navigate to the home page
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during sign up');
       console.error('Sign up error:', err);
+      setError('An unexpected error occurred during sign-up. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -195,4 +208,4 @@ function SignUp() {
   );
 }
 
-export default SignUp; 
+export default SignUp;

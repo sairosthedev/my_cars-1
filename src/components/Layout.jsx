@@ -1,7 +1,10 @@
+// Importing necessary components
 import NavBar from './NavBar';
 import Footer from './Footer';
 
+// Layout component definition
 const Layout = ({ children, isAuthenticated, successMessage }) => {
+  // Rendering the layout
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {isAuthenticated && (
@@ -22,4 +25,5 @@ const Layout = ({ children, isAuthenticated, successMessage }) => {
   );
 };
 
+// Exporting the Layout component
 export default Layout; 

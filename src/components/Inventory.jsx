@@ -1,19 +1,24 @@
+// Importing necessary libraries and components
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import SearchBar from './SearchBar';
 import CarList from './CarList';
 
+// Inventory component definition
 const Inventory = () => {
+  // State hooks for managing cars data, loading state, and error messages
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
+  // useEffect hook to fetch cars data on component mount
   useEffect(() => {
     fetchCars();
   }, []);
 
+  // Function to fetch cars data from Supabase
   const fetchCars = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -41,10 +46,12 @@ const Inventory = () => {
     }
   };
 
+  // Function to handle car deletion
   const handleDelete = async (id) => {
     await fetchCars();
   };
 
+  // Filtering and sorting cars based on search term and sort order
   const filteredCars = cars
     .filter(car => 
       car.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,6 +73,7 @@ const Inventory = () => {
       }
     });
 
+  // Conditional rendering based on loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -74,6 +82,7 @@ const Inventory = () => {
     );
   }
 
+  // Conditional rendering based on error state
   if (error) {
     return (
       <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
@@ -82,6 +91,7 @@ const Inventory = () => {
     );
   }
 
+  // Main render - Search bar and car list
   return (
     <div className="space-y-8">
       <SearchBar 
@@ -98,4 +108,5 @@ const Inventory = () => {
   );
 };
 
+// Exporting the Inventory component
 export default Inventory;
