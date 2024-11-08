@@ -52,27 +52,26 @@ function SignUp() {
       });
 
       if (signupError) {
-        // Log the error for debugging
         console.error('Signup Error:', signupError.message);
 
-        // Set user-friendly error messages based on Supabase error response
         if (signupError.message.includes('not authorized')) {
           setError('This email address is not authorized for sign-up.');
+        } else if (signupError.message.includes('already registered')) {
+          setError('This email is already registered.');
         } else {
-          setError(signupError.message);
+          setError('An unexpected error occurred during sign-up.');
         }
+        setIsLoading(false);
         return;
       }
 
       if (data.user) {
-        // Store user data in local storage and navigate to the home page
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/');
       }
     } catch (err) {
       console.error('Sign up error:', err);
       setError('An unexpected error occurred during sign-up. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -93,7 +92,7 @@ function SignUp() {
         </h2>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 border-t-4 border-amber-400">
+          <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 border-t-4 border-amber-400 max-h-[80vh] overflow-y-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-500 text-red-500 px-4 py-3 rounded relative">

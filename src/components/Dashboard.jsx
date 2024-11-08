@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import Slider from 'react-slick'; // Import Slider from react-slick
 import Stats from './Stats';
 import { supabase } from '../utils/supabaseClient';
+import "slick-carousel/slick/slick.css"; // Import slick-carousel styles
+import "slick-carousel/slick/slick-theme.css"; // Import slick-carousel theme
 
 // Dashboard component definition
 const Dashboard = () => {
@@ -50,6 +53,35 @@ const Dashboard = () => {
   const totalValue = cars.reduce((sum, car) => sum + car.price, 0);
   const averageYear = Math.round(cars.reduce((sum, car) => sum + car.year, 0) / cars.length) || 0;
 
+  // Slider settings for react-slick
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: true, // Enable autoplay
+    autoplaySpeed: 2000, // Set autoplay speed to 2 seconds
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          infinite: true,
+          dots: true
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1
+        }
+      }
+    ]
+  };
+
   // Rendering the dashboard with stats and car cards
   return (
     <div className="space-y-8">
@@ -58,8 +90,8 @@ const Dashboard = () => {
         carCount={cars.length} 
         averageYear={averageYear} 
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cars.slice(0, 3).map(car => (
+      <Slider {...settings}>
+        {cars.map(car => (
           <div 
             key={car.id} 
             className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
@@ -79,7 +111,7 @@ const Dashboard = () => {
             </div>
           </div>
         ))}
-      </div>
+      </Slider>
     </div>
   );
 };

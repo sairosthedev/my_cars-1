@@ -53,9 +53,9 @@ function SignIn() {
       <div className="w-full relative z-10">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
-            <GiSteeringWheel className="text-4xl text-white" />
-            <span className="text-2xl font-bold text-white drop-shadow-lg">
-              Auto<span className="text-amber-400">Track</span>
+            <GiSteeringWheel className="text-4xl text-gold-400" />
+            <span className="text-2xl font-bold text-white drop-shadow-lg font-playfair">
+              Auto<span className="text-gold-400">Track</span>
             </span>
           </div>
         </div>
@@ -64,7 +64,7 @@ function SignIn() {
         </h2>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 border-t-4 border-amber-400">
+          <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10 border-t-4 border-navy-600">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-500 text-red-500 px-4 py-3 rounded relative">
@@ -82,7 +82,7 @@ function SignIn() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-navy-600 focus:border-navy-600 font-inter"
                 />
               </div>
 
@@ -96,7 +96,7 @@ function SignIn() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-800 focus:border-red-800"
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-navy-600 focus:border-navy-600 font-inter"
                 />
               </div>
 
@@ -122,9 +122,7 @@ function SignIn() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 ${
-                  isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                }`}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-navy-800 to-navy-600 hover:from-navy-900 hover:to-navy-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy-600 font-inter"
               >
                 {isLoading ? (
                   <span className="flex items-center">

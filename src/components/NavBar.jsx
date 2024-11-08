@@ -35,22 +35,26 @@ function NavBar({ setActiveView }) {
   };
 
   return (
-    <div className="w-full bg-gradient-to-r from-red-900 to-red-800 shadow-md border-b-4 border-amber-400">
+    <div className="w-full bg-gradient-to-r from-navy-900 to-navy-800 shadow-md border-b-4 border-gold-400">
       <nav className="flex items-center justify-between relative px-6 py-4">
         <div className="flex items-center group">
-          <GiSteeringWheel className="text-2xl text-amber-400 transition-transform duration-500 group-hover:rotate-180" />
-          <span className="ml-2 font-bold text-xl text-white tracking-wider">
-            Auto<span className="text-amber-400">Track</span>
+          <GiSteeringWheel className="text-2xl text-gold-400 transition-transform duration-500 group-hover:rotate-180" />
+          <span className="ml-2 font-bold text-xl text-white tracking-wider font-playfair">
+            Auto<span className="text-gold-400">Track</span>
           </span>
         </div>
         <div className="flex items-center space-x-4 absolute left-1/2 transform -translate-x-1/2">
           <Link
             to="/"
-            className={`${getActiveClass('/')} flex items-center px-4 py-2 rounded-lg transition-colors duration-200`}
+            className={`${
+              location.pathname === '/' 
+                ? 'bg-navy-700 text-white' 
+                : 'text-gray-200 hover:bg-navy-700'
+            } flex items-center px-4 py-2 rounded-lg transition-colors duration-200 font-inter`}
             onClick={() => setActiveView('dashboard')}
           >
             <HomeIcon className="h-6 w-6 mr-2" />
-            <span className="font-medium text-white">Dashboard</span>
+            <span className="font-medium">Dashboard</span>
           </Link>
           <Link
             to="/inventory"
@@ -79,7 +83,7 @@ function NavBar({ setActiveView }) {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-white hover:bg-red-700"
+          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-white hover:bg-navy-700 font-inter"
         >
           <ArrowRightOnRectangleIcon className="h-6 w-6 mr-2" />
           <span className="font-medium">Sign Out</span>

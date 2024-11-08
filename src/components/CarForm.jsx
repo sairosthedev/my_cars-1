@@ -14,6 +14,7 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { carMakes, validateCustomEntry, generateVIN } from '../utils/carData';
 
 /**
  * CarForm Component
@@ -49,6 +50,15 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
+
+  // Add states for custom entries
+  const [isCustomMake, setIsCustomMake] = useState(false);
+  const [isCustomModel, setIsCustomModel] = useState(false);
+  const [customMake, setCustomMake] = useState('');
+  const [customModel, setCustomModel] = useState('');
+
+  // Add this with the other state declarations at the top of the component
+  const [availableModels, setAvailableModels] = useState([]);
 
   // Populate form with initial data if editing existing car
   useEffect(() => {
@@ -258,30 +268,61 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
    * @param {Event} e - Input change event
    */
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    const processedValue = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    const { name, value } = e.target;
     
-    // Handle nested insurance fields
-    if (name.startsWith('insurance.')) {
-      const [_, field] = name.split('.');
-      setFormState(prev => ({
-        ...prev,
-        insurance: {
-          ...prev.insurance,
-          [field]: value
-        }
-      }));
+    if (name === 'make') {
+      if (value === 'custom') {
+        setIsCustomMake(true);
+        setFormState(prev => ({ ...prev, make: '', model: '' }));
+        setAvailableModels([]); // Clear available models
+      } else {
+        setAvailableModels(carMakes[value] || []); // Set available models for selected make
+        setFormState(prev => ({
+          ...prev,
+          make: value,
+          model: '',
+          vin: ''
+        }));
+      }
+    } else if (name === 'model') {
+      if (value === 'custom') {
+        setIsCustomModel(true);
+        setFormState(prev => ({ ...prev, model: '' }));
+      } else {
+        setFormState(prev => {
+          const newState = { ...prev, model: value };
+          if (newState.make && newState.model && newState.year) {
+            newState.vin = generateVIN(newState.make, newState.model, newState.year);
+          }
+          return newState;
+        });
+      }
     } else {
-      setFormState(prev => ({ ...prev, [name]: processedValue }));
-    }
-    
-    // Clear error when field is modified
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+      const { name, value, type } = e.target;
+      const processedValue = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+      
+      // Handle nested insurance fields
+      if (name.startsWith('insurance.')) {
+        const [_, field] = name.split('.');
+        setFormState(prev => ({
+          ...prev,
+          insurance: {
+            ...prev.insurance,
+            [field]: value
+          }
+        }));
+      } else {
+        setFormState(prev => ({ ...prev, [name]: processedValue }));
+      }
+      
+      // Clear error when field is modified
+      if (errors[name]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
     }
   };
 
@@ -334,6 +375,111 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
     checkExistingCars();
   }, []);
 
+  // Modify the make selection part in the form
+  const renderMakeSelection = () => (
+    <FormItem>
+      <FormLabel>Make *</FormLabel>
+      <div className="space-y-2">
+        <FormControl>
+          {!isCustomMake ? (
+            <select
+              name="make"
+              value={formState.make}
+              onChange={handleChange}
+              className="w-full rounded-md border border-input bg-background px-3 py-2"
+            >
+              <option value="">Select Make</option>
+              {Object.keys(carMakes).sort().map(make => (
+                <option key={make} value={make}>{make}</option>
+              ))}
+              <option value="custom">-- Add Custom Make --</option>
+            </select>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                name="customMake"
+                value={customMake}
+                onChange={(e) => {
+                  setCustomMake(e.target.value);
+                  if (validateCustomEntry(e.target.value)) {
+                    setFormState(prev => ({ ...prev, make: e.target.value }));
+                  }
+                }}
+                placeholder="Enter custom make"
+                className={errors.make ? 'border-red-500' : ''}
+              />
+              <Button 
+                type="button"
+                onClick={() => {
+                  setIsCustomMake(false);
+                  setCustomMake('');
+                  setFormState(prev => ({ ...prev, make: '' }));
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </FormControl>
+        {errors.make && <FormMessage className="text-red-500">{errors.make}</FormMessage>}
+      </div>
+    </FormItem>
+  );
+
+  // Modify the model selection part
+  const renderModelSelection = () => (
+    <FormItem>
+      <FormLabel>Model *</FormLabel>
+      <div className="space-y-2">
+        <FormControl>
+          {!isCustomModel ? (
+            <select
+              name="model"
+              value={formState.model}
+              onChange={handleChange}
+              className="w-full rounded-md border border-input bg-background px-3 py-2"
+              disabled={!formState.make && !isCustomMake}
+            >
+              <option value="">Select Model</option>
+              {availableModels.map(model => (
+                <option key={model} value={model}>{model}</option>
+              ))}
+              <option value="custom">-- Add Custom Model --</option>
+            </select>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                name="customModel"
+                value={customModel}
+                onChange={(e) => {
+                  setCustomModel(e.target.value);
+                  if (validateCustomEntry(e.target.value)) {
+                    setFormState(prev => ({ ...prev, model: e.target.value }));
+                  }
+                }}
+                placeholder="Enter custom model"
+                className={errors.model ? 'border-red-500' : ''}
+              />
+              <Button 
+                type="button"
+                onClick={() => {
+                  setIsCustomModel(false);
+                  setCustomModel('');
+                  setFormState(prev => ({ ...prev, model: '' }));
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </FormControl>
+        {errors.model && <FormMessage className="text-red-500">{errors.model}</FormMessage>}
+      </div>
+    </FormItem>
+  );
+
   // Render form UI
   return (
     <Card className="w-full max-w-4xl mx-auto bg-card relative overflow-hidden">
@@ -365,33 +511,8 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
             
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormItem>
-                <FormLabel>Make *</FormLabel>
-                <FormControl>
-                  <Input
-                    name="make"
-                    value={formState.make}
-                    onChange={handleChange}
-                    placeholder="e.g., Toyota"
-                    className={errors.make ? 'border-red-500' : ''}
-                  />
-                </FormControl>
-                {errors.make && <FormMessage className="text-red-500">{errors.make}</FormMessage>}
-              </FormItem>
-
-              <FormItem>
-                <FormLabel>Model *</FormLabel>
-                <FormControl>
-                  <Input
-                    name="model"
-                    value={formState.model}
-                    onChange={handleChange}
-                    placeholder="e.g., Camry"
-                    className={errors.model ? 'border-red-500' : ''}
-                  />
-                </FormControl>
-                {errors.model && <FormMessage className="text-red-500">{errors.model}</FormMessage>}
-              </FormItem>
+              {renderMakeSelection()}
+              {renderModelSelection()}
 
               <FormItem>
                 <FormLabel>Year *</FormLabel>
@@ -646,21 +767,27 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
               </span>
             </FormItem>
 
-            {/* Submit Button */}
+            {/* Submit Button - Updated with navy gradient */}
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-red-800 to-orange-500 hover:from-red-900 hover:to-orange-600 text-white transition-all duration-300"
+              className="w-full bg-gradient-to-r from-navy-800 to-navy-600 hover:from-navy-900 hover:to-navy-700 text-white transition-all duration-300 font-inter"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <span>Saving...</span>
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
               ) : (
                 <span>{initialData ? 'Update Car' : 'Add Car'}</span>
               )}
             </Button>
 
-            {/* Required Fields Note */}
-            <p className="text-sm text-gray-500 mt-4">
+            {/* Required Fields Note - Updated with navy color */}
+            <p className="text-sm text-navy-600 mt-4 font-inter">
               * Required fields
             </p>
           </Form>
