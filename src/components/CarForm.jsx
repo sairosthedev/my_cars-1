@@ -60,6 +60,12 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
   // Add this with the other state declarations at the top of the component
   const [availableModels, setAvailableModels] = useState([]);
 
+  // Add these after other state declarations
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadType, setUploadType] = useState('file'); // 'file' or 'url'
+
   // Populate form with initial data if editing existing car
   useEffect(() => {
     if (initialData) {
@@ -97,8 +103,15 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
       }
     }
 
-    if (formState.price && (isNaN(formState.price) || parseFloat(formState.price) < 0)) {
-      newErrors.price = 'Price must be a positive number';
+    if (formState.price) {
+      const price = parseFloat(formState.price);
+      if (isNaN(price)) {
+        newErrors.price = 'Price must be a valid number';
+      } else if (price < 0) {
+        newErrors.price = 'Price cannot be negative';
+      } else if (price >= 100000000) {
+        newErrors.price = 'Price must be less than 100 million';
+      }
     }
 
     if (formState.mileage) {
@@ -114,7 +127,7 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
       if (formState.vin.length !== 17) {
         newErrors.vin = 'VIN must be exactly 17 characters';
       } else if (!/^[A-HJ-NPR-Z0-9]{17}$/i.test(formState.vin)) {
-        newErrors.vin = 'VIN contains invalid characters';
+        newErrors.vin = 'VIN can only contain letters (except I,O,Q) and numbers';
       }
     }
 
@@ -179,11 +192,16 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
     }
 
     // Image URL Validation
-    if (formState.image) {
+    if (uploadType === 'url' && formState.image) {
       try {
-        new URL(formState.image);
+        const url = new URL(formState.image);
+        // Check if the URL points to an image
+        const isImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url.pathname.toLowerCase());
+        if (!isImage) {
+          newErrors.image = 'URL must point to an image file';
+        }
       } catch {
-        newErrors.image = 'Please enter a valid URL';
+        newErrors.image = 'Please enter a valid image URL';
       }
     }
 
@@ -204,62 +222,61 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
-    
-    if (validateForm()) {
-      try {
-        console.log('Starting form submission...');
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    setIsUploading(true);
+
+    try {
+      if (validateForm()) {
+        // Upload image first
+        const imageUrl = await handleImageUpload();
         
-        if (sessionError) {
-          console.error('Authentication error:', sessionError);
-          throw new Error('Authentication error occurred')
-        }
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw new Error('Authentication error occurred');
+        if (!session) throw new Error('Please sign in to add a car');
 
-        if (!session) {
-          console.error('No session found');
-          throw new Error('Please sign in to add a car')
+        // Format the price to ensure it's within database limits
+        let formattedPrice = null;
+        if (formState.price) {
+          const price = parseFloat(formState.price);
+          if (price >= 100000000) { // 100 million limit
+            throw new Error('Price must be less than 100 million');
+          }
+          formattedPrice = price;
         }
-
-        console.log('User session:', session);
 
         const carData = {
           make: formState.make,
           model: formState.model,
           year: parseInt(formState.year),
-          price: parseFloat(formState.price),
-          mileage: parseInt(formState.mileage),
-          image: formState.image,
+          price: formattedPrice, // Use formatted price
+          mileage: formState.mileage ? parseInt(formState.mileage) : null,
+          image: imageUrl,
           vin: formState.vin,
           license_plate: formState.licensePlate,
           color: formState.color,
           transmission: formState.transmission,
           fuel_type: formState.fuelType,
-          last_service_date: formState.lastServiceDate,
-          next_service_due: formState.nextServiceDue,
+          last_service_date: formState.lastServiceDate || null,
+          next_service_due: formState.nextServiceDue || null,
           insurance: formState.insurance,
           notes: formState.notes,
           user_id: session.user.id
         };
-
-        console.log('Submitting car data:', carData);
 
         const { data, error } = await supabase
           .from('cars')
           .insert([carData])
           .select();
 
-        if (error) {
-          console.error('Database error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log('Successfully added car:', data);
         navigate('/inventory');
-
-      } catch (error) {
-        console.error('Submission error:', error);
-        setSubmitError(error.message || 'Failed to save car details. Please try again.');
       }
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitError(error.message || 'Failed to save car details. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -476,6 +493,157 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
           )}
         </FormControl>
         {errors.model && <FormMessage className="text-red-500">{errors.model}</FormMessage>}
+      </div>
+    </FormItem>
+  );
+
+  // Add this function to handle file selection
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setErrors(prev => ({
+          ...prev,
+          image: 'File size must be less than 5MB'
+        }));
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({
+          ...prev,
+          image: 'Please upload an image file'
+        }));
+        return;
+      }
+
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.image;
+        return newErrors;
+      });
+    }
+  };
+
+  // Add this function after the handleFileSelect function
+  const handleImageUpload = async () => {
+    if (!imageFile && !formState.image) return null;
+
+    // If using URL input
+    if (uploadType === 'url' && formState.image) {
+      try {
+        const url = new URL(formState.image);
+        // Check if the URL points to an image
+        const isImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url.pathname.toLowerCase());
+        if (!isImage) {
+          throw new Error('URL must point to an image file');
+        }
+        // Return the validated URL
+        return url.toString();
+      } catch (error) {
+        if (error.message === 'URL must point to an image file') {
+          throw error;
+        }
+        throw new Error('Please enter a valid image URL');
+      }
+    }
+
+    // If using file upload
+    if (uploadType === 'file' && imageFile) {
+      try {
+        const fileExt = imageFile.name.split('.').pop().toLowerCase();
+        // Validate file extension
+        if (!['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'].includes(fileExt)) {
+          throw new Error('Invalid file type. Please upload an image file.');
+        }
+
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('car-images')
+          .upload(filePath, imageFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: imageFile.type
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('car-images')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw new Error(error.message || 'Failed to upload image');
+      }
+    }
+
+    return null;
+  };
+
+  // Replace the existing Image URL form item with this new version
+  const renderImageInput = () => (
+    <FormItem>
+      <FormLabel>Car Image</FormLabel>
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            onClick={() => setUploadType('file')}
+            variant={uploadType === 'file' ? 'default' : 'outline'}
+          >
+            Upload File
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setUploadType('url')}
+            variant={uploadType === 'url' ? 'default' : 'outline'}
+          >
+            Use URL
+          </Button>
+        </div>
+
+        {uploadType === 'file' ? (
+          <div className="space-y-4">
+            <FormControl>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className={errors.image ? 'border-red-500' : ''}
+              />
+            </FormControl>
+            {imagePreview && (
+              <div className="mt-4">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="max-w-xs rounded-lg shadow-md"
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <FormControl>
+            <Input
+              name="image"
+              value={formState.image}
+              onChange={handleChange}
+              placeholder="Enter image URL"
+              className={errors.image ? 'border-red-500' : ''}
+            />
+          </FormControl>
+        )}
+        
+        {errors.image && <FormMessage className="text-red-500">{errors.image}</FormMessage>}
       </div>
     </FormItem>
   );
@@ -731,20 +899,8 @@ const CarForm = ({ initialData, isSubmitting = false }) => {
               </FormItem>
             </div>
 
-            {/* Image URL */}
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input
-                  name="image"
-                  value={formState.image}
-                  onChange={handleChange}
-                  placeholder="Enter URL of vehicle image"
-                  className={errors.image ? 'border-red-500' : ''}
-                />
-              </FormControl>
-              {errors.image && <FormMessage className="text-red-500">{errors.image}</FormMessage>}
-            </FormItem>
+            {/* Replace the existing Image URL FormItem with this: */}
+            {renderImageInput()}
 
             {/* Notes */}
             <FormItem>

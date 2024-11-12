@@ -347,7 +347,7 @@ export const carMakes = {
     // SUVs & Crossovers
     "C-HR", "RAV4", "Venza", "Highlander", "4Runner", "Sequoia", "Land Cruiser",
     // Trucks
-    "Tacoma", "Tundra",
+    "Tacoma", "Tundra","Hilux","Land Cruiser Prado","Land Cruiser 200","VXR",
     // Vans
     "Sienna",
     // Sports Cars
@@ -356,14 +356,14 @@ export const carMakes = {
     "bZ4X",
     // Historical Models
     "Celica", "MR2", "Supra", "Tercel", "Matrix", "FJ Cruiser"
-  ],
+  ],    
 
   "Volkswagen": [
     // Cars
     "Jetta", "Passat", "Arteon", "Golf", "Golf GTI", "Golf R",
     // SUVs & Crossovers
     "Taos", "Tiguan", "Atlas", "Atlas Cross Sport", "ID.4",
-    // Historical Models
+    // H    istorical Models
     "Beetle", "CC", "Eos", "Touareg", "Phaeton", "Rabbit",
     "Scirocco", "Corrado", "Thing", "Karmann Ghia"
   ],

@@ -83,3 +83,20 @@ body, html {
   --text-primary: #2d3748;
   --text-secondary: #4a5568;
 }
+
+/* Add these styles to handle body scrolling */
+body.menu-open {
+  overflow: hidden;
+}
+
+/* Add smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve touch scrolling on mobile */
+@media (max-width: 1024px) {
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}

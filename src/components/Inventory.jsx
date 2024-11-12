@@ -61,9 +61,9 @@ const Inventory = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'newest':
-          return new Date(b.created_at) - new Date(a.created_at);
-        case 'oldest':
           return new Date(a.created_at) - new Date(b.created_at);
+        case 'oldest':
+          return new Date(b.created_at) - new Date(a.created_at);
         case 'expensive':
           return b.price - a.price;
         case 'cheapest':

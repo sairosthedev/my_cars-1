@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { supabase } from '../utils/supabaseClient';
 import { formatCurrency } from '../utils/format';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -48,7 +49,11 @@ function CarList({ cars, onDelete }) {
   // Empty state display with CTA to add first car
   if (!cars || cars.length === 0) {
     return (
-      <div className="text-center p-8">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center p-8"
+      >
         <p className="text-gray-600 mb-4">No cars in inventory yet.</p>
         <Link 
           to="/add"
@@ -56,13 +61,17 @@ function CarList({ cars, onDelete }) {
         >
           Add Your First Car
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
   // Main render - Grid of car cards
   return (
-    <div className="container mx-auto p-4">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="container mx-auto p-4"
+    >
       {/* Header with Add New Car button */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-red-800">Your Inventory</h2>
@@ -74,22 +83,38 @@ function CarList({ cars, onDelete }) {
         </Link>
       </div>
       
-      {/* Responsive grid of car cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cars.map((car) => (
-          // Individual car card
-          <div
+      {/* Animated grid of car cards */}
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {cars.map((car, index) => (
+          <motion.div
             key={car.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-200"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.3,
+              delay: index * 0.1
+            }}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+            onClick={(e) => handleView(car.id, e)}
+            className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-200 cursor-pointer"
           >
-            {/* Car image section */}
-            <div className="relative h-48">
+            {/* Car image section with animation */}
+            <motion.div 
+              className="relative h-48"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
               <img
                 src={car.image || 'https://via.placeholder.com/400x300?text=No+Image'}
                 alt={`${car.make} ${car.model}`}
                 className="w-full h-full object-cover"
               />
-            </div>
+            </motion.div>
             {/* Car details section */}
             <div className="p-4">
               <h3 className="text-xl font-semibold text-red-800">
@@ -108,35 +133,32 @@ function CarList({ cars, onDelete }) {
                 <span>{car.fuel_type}</span>
               </div>
               
-              {/* Action buttons for view, edit, and delete */}
+              {/* Action buttons with hover animation */}
               <div className="mt-4 flex justify-end space-x-2 border-t pt-4">
-                <button
-                  onClick={(e) => handleView(car.id, e)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
-                  title="View Details"
-                >
-                  <EyeIcon className="h-5 w-5" />
-                </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={(e) => handleEdit(car.id, e)}
                   className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors duration-200"
                   title="Edit Car"
                 >
                   <PencilIcon className="h-5 w-5" />
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={(e) => handleDelete(car.id, e)}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
                   title="Delete Car"
                 >
                   <TrashIcon className="h-5 w-5" />
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
