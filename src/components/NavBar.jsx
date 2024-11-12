@@ -65,7 +65,7 @@ function NavBar({ setActiveView }) {
   return (
     <div className="w-full bg-gradient-to-r from-navy-900 to-navy-800 shadow-md border-b-4 border-gold-400">
       <nav className="relative px-4 py-4 flex justify-between items-center">
-        {/* Logo */}
+        {/* Logo - Left */}
         <div className="flex items-center group">
           <GiSteeringWheel className="text-2xl text-gold-400 transition-transform duration-500 group-hover:rotate-180" />
           <span className="ml-2 font-bold text-xl text-white tracking-wider font-playfair">
@@ -87,19 +87,25 @@ function NavBar({ setActiveView }) {
           </button>
         </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`${getActiveClass(link.to)} flex items-center px-4 py-2 rounded-lg transition-colors duration-200 font-inter`}
-              onClick={link.onClick}
-            >
-              {link.icon}
-              <span className="ml-2 font-medium">{link.text}</span>
-            </Link>
-          ))}
+        {/* Desktop Navigation - Centered */}
+        <div className="hidden lg:flex items-center justify-center flex-1 mx-4">
+          <div className="flex items-center space-x-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`${getActiveClass(link.to)} flex items-center px-4 py-2 rounded-lg transition-colors duration-200 font-inter`}
+                onClick={link.onClick}
+              >
+                {link.icon}
+                <span className="ml-2 font-medium">{link.text}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Sign Out Button - Right */}
+        <div className="hidden lg:block">
           <button
             onClick={handleSignOut}
             className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200 text-white hover:bg-navy-700 font-inter"
