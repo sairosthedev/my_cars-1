@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,4 +34,17 @@ export const useAuth = () => {
   }, []);
 
   return { isAuthenticated };
+};
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  return user ? children : null;
 }; 
