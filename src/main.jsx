@@ -14,63 +14,68 @@ import CarDetails from './components/CarDetails';
 import Analytics from './components/Analytics';
 import MaintenancePage from './components/MaintenancePage';
 import AuthCallback from './components/auth/AuthCallback';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />,
     children: [
+      // Public routes
       {
-        path: "/",
-        element: <Dashboard />
-      },
-      {
-        path: "/inventory",
-        element: <Inventory />
-      },
-      {
-        path: "/add",
-        element: <CarForm />
-      },
-      {
-        path: "/about",
-        element: <About />
-      },
-      {
-        path: "/signin",
+        path: 'signin',
         element: <SignIn />
       },
       {
-        path: "/signup",
+        path: 'signup',
         element: <SignUp />
       },
       {
-        path: "/car/:id",
-        element: <CarDetails />
-      },
-      {
-        path: "/analytics",
-        element: <Analytics />
-      },
-      {
-        path: "/maintenance",
-        element: <MaintenancePage />
-      },
-      {
-        path: "/auth/callback",
+        path: 'auth/callback',
         element: <AuthCallback />
+      },
+      // Protected routes
+      {
+        path: '/',
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+        index: true
+      },
+      {
+        path: 'inventory',
+        element: <ProtectedRoute><Inventory /></ProtectedRoute>
+      },
+      {
+        path: 'add',
+        element: <ProtectedRoute><CarForm /></ProtectedRoute>
+      },
+      {
+        path: 'car/:id',
+        element: <ProtectedRoute><CarDetails /></ProtectedRoute>
+      },
+      {
+        path: 'analytics',
+        element: <ProtectedRoute><Analytics /></ProtectedRoute>
+      },
+      {
+        path: 'maintenance',
+        element: <ProtectedRoute><MaintenancePage /></ProtectedRoute>
+      },
+      {
+        path: 'about',
+        element: <ProtectedRoute><About /></ProtectedRoute>
       }
     ]
   }
-], {
-  future: {
-    v7_startTransition: true,
-    v7_relativeSplatPath: true
-  }
-});
+]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+    <RouterProvider router={router} future={{
+      v7_startTransition: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true
+    }} />
+  </React.StrictMode>
+);

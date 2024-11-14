@@ -1,40 +1,39 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { useNavigate } from 'react-router-dom';
 
-export const useAuth = () => {
+export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (mounted) {
-          setIsAuthenticated(!!session);
-        }
+        setIsAuthenticated(!!session);
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('Error checking auth status:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
+    // Check initial auth state
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted) {
-        setIsAuthenticated(!!session);
-      }
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
     });
 
     return () => {
-      mounted = false;
-      subscription?.unsubscribe();
+      if (subscription) subscription.unsubscribe();
     };
   }, []);
 
-  return { isAuthenticated };
-};
+  return { isAuthenticated, isLoading };
+}
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
