@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick'; // Import Slider from react-slick
 import Stats from './Stats';
-import { supabase } from '../utils/supabaseClient';
+import { createClient } from 'supabase';
 import "slick-carousel/slick/slick.css"; // Import slick-carousel styles
 import "slick-carousel/slick/slick-theme.css"; // Import slick-carousel theme
+
+// At the top of your file
+const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY
+
+// Then use these variables when initializing your Supabase client
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Dashboard component definition
 const Dashboard = () => {
