@@ -11,11 +11,13 @@ import {
 } from '@heroicons/react/24/outline'
 import { GiSteeringWheel } from 'react-icons/gi'
 import { supabase } from '../utils/supabaseClient'
+import { useAuth } from '../hooks/useAuth'
 
 function NavBar({ setActiveView }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user, signOut } = useAuth()
 
   const getActiveClass = (path) => {
     return location.pathname === path
@@ -165,6 +167,23 @@ function NavBar({ setActiveView }) {
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
             onClick={() => setIsMenuOpen(false)}
           />
+        )}
+
+        {user && (
+          <div className="flex items-center space-x-4">
+            <Link 
+              to="/profile" 
+              className="text-gray-300 hover:text-white"
+            >
+              Profile Settings
+            </Link>
+            <button 
+              onClick={signOut}
+              className="text-gray-300 hover:text-white"
+            >
+              Sign Out
+            </button>
+          </div>
         )}
       </nav>
     </div>

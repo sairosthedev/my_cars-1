@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GiSteeringWheel } from 'react-icons/gi';
 import { supabase } from '../../utils/supabaseClient';
+import revSound from '../../assets/rev.mp3';
 
 function SignIn() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ function SignIn() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const revAudio = new Audio(revSound);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -31,13 +33,16 @@ function SignIn() {
       if (signinError) throw signinError;
 
       if (data?.user) {
+        revAudio.play();
         const userData = {
           id: data.user.id,
           email: data.user.email,
           name: data.user.user_metadata?.full_name || email.split('@')[0],
         };
         localStorage.setItem('user', JSON.stringify(userData));
-        navigate('/', { replace: true });
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 1000);
       } else {
         setError('Invalid login credentials');
       }

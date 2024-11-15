@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { useCars } from './hooks/useCars';
 import Layout from './components/Layout';
 import './App.css';
+import ProfileManager from './components/auth/ProfileManager';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
