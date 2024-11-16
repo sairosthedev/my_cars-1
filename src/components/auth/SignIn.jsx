@@ -27,7 +27,7 @@ function SignIn() {
     try {
       const { data, error: signinError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password,
+        password,
       });
 
       if (signinError) throw signinError;
@@ -76,7 +76,7 @@ function SignIn() {
                   {error}
                 </div>
               )}
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email address
@@ -169,4 +169,4 @@ function SignIn() {
   );
 }
 
-export default SignIn; 
+export default SignIn;
