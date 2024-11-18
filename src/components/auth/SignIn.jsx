@@ -10,19 +10,73 @@ function SignIn() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const revAudio = new Audio(revSound);
+  
+  const revAudio = React.useRef(null);
+  
+  useEffect(() => {
+    revAudio.current = new Audio(revSound);
+    
+    return () => {
+      if (revAudio.current) {
+        revAudio.current.pause();
+        revAudio.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      navigate('/', { replace: true });
-    }
-  }, [navigate]);
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && mounted) {
+          const userData = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+          };
+          localStorage.setItem('user', JSON.stringify(userData));
+          navigate('/', { replace: true });
+        } else {
+          localStorage.removeItem('user');
+        }
+      } catch (error) {
+        console.warn('Session check failed:', error);
+        localStorage.removeItem('user');
+      }
+    };
+    
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('user');
+        if (mounted) {
+          navigate('/signin', { replace: true });
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+
+    if (revAudio.current) {
+      try {
+        revAudio.current.currentTime = 0;
+        await revAudio.current.play();
+      } catch (audioError) {
+        console.warn('Audio playback failed:', audioError);
+      }
+    }
 
     try {
       const { data, error: signinError } = await supabase.auth.signInWithPassword({
@@ -33,16 +87,16 @@ function SignIn() {
       if (signinError) throw signinError;
 
       if (data?.user) {
-        revAudio.play();
         const userData = {
           id: data.user.id,
           email: data.user.email,
           name: data.user.user_metadata?.full_name || email.split('@')[0],
         };
         localStorage.setItem('user', JSON.stringify(userData));
+        
         setTimeout(() => {
           navigate('/', { replace: true });
-        }, 1000);
+        }, 100);
       } else {
         setError('Invalid login credentials');
       }
